@@ -22,5 +22,5 @@ Para disminuir la fragmentación de memoria al minimo, se va a utilizar:
 
 <ul>
  <li>Memory pools</li>
- <li>Implementación de memoria dinámica heap4.c</li>
+ <li>Implementación de memoria dinámica "heap4.c"</li>
 </ul>
