@@ -25,4 +25,4 @@ Para disminuir la fragmentación de memoria al minimo, se va a utilizar:
  <li>Implementación de memoria dinámica "heap4.c"</li>
 </ul>
 
-Además, los pools de memoria ofrecen una asignación y un reciclaje rápidos y deterministas de los bloques.
+Además, los pools de memoria ofrecen una asignación y un reciclaje rápido y determinista de los bloques.
