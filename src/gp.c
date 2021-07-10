@@ -82,13 +82,14 @@ static void _init_state_machine(GP_STATE_MACHINE  *state_machine)
 
 static void _init_frame_state(GP_STATE_MACHINE  *state_machine)
 {
-
+	/*Se detecto el inicio de una nueva trama*/
 	(*state_machine) = START_MESSAGE;
 }
 
 
 static void _end_frame_state(GP_STATE_MACHINE   *state_machine)
 {
+	/*Se detecto el caracter de finalizacion*/
 	(*state_machine) = END_MESSAGE;
 
 }
