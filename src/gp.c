@@ -23,23 +23,13 @@
 
 #define N_QUEUE 10
 
-//definida en main, mejorar depues
+
+
+
+//queue del sistema
 static   QueueHandle_t queue_print;
 
-
-/*Definiciones*/
-
-
-
-
-
-
-
-/*Variables privadas (global e static)*/
-
-
-
-
+static   QueueHandle_t queue_inputs;
 
 
 
@@ -55,6 +45,35 @@ static   QueueHandle_t queue_print;
 
 
 
+//-----------------------------TAREAS-------------------------
+
+/*TAREA QUE GESTIONA LA MAQUINA DE ESTADOS DEL SISTEMA*/
+
+static void state_machine_manager(void *vargs)
+{
+	obj_gp* obj = (obj_gp*)vargs ;
+
+
+	//inicia la maquina de estados
+	_init_state_machine(obj);
+
+	char input;
+
+	    while (1)
+	    {
+	        xQueueReceive(queue_inputs, &input, portMAX_DELAY);
+
+	        gpioToggle(LED1);
+			change_state_machine(input,obj);
+
+	    }
+
+
+}
+
+
+
+/*TAREA PARA GESTIONAR LA IMPRESION DE LOS DATOS*/
 
 static void print_manager(void *taskParmPtr)
 {
@@ -67,32 +86,10 @@ static void print_manager(void *taskParmPtr)
         printf("%s\n", mensaje);
     }
 }
-static void init_print_manager(void)
-{
-
-    BaseType_t res;
 
 
+//------------------------------------------------------
 
-    // Creo tarea unica de impresion
-    res = xTaskCreate(
-        print_manager,                 // Funcion de la tarea a ejecutar
-        (const char *)"print_manager", // Nombre de la tarea como String amigable para el usuario
-        configMINIMAL_STACK_SIZE * 8,  // Cantidad de stack de la tarea
-        0,                             // Parametros de tarea
-        tskIDLE_PRIORITY + 1,          // Prioridad de la tarea
-        0                              // Puntero a la tarea creada en el sistema
-    );
-
-    // Gestion de errores
-    configASSERT(res == pdPASS);
-
-    // Crear cola
-    queue_print = xQueueCreate(N_QUEUE, sizeof(char *));
-
-    // Gestion de errores de colas
-    configASSERT(queue_print != NULL);
-}
 
 
 
@@ -103,23 +100,30 @@ static void _ISR_Processing( void *vargs )
 {
 
 
-	obj_gp *obj = (obj_gp*)vargs ;
+	obj_gp* obj = (obj_gp*)vargs ;
 
 
    char input = uartRxRead( obj->uart);
 
-   /*Funcion que cambia de estado la maquina*/
-   change_state_machine(input,obj);
 
+   printf( " <<%c>> por UART\r\n", input );
+
+   BaseType_t xHigherPriorityTaskWoken = pdFALSE; //Comenzamos definiendo la variable
+
+   /*ENvio a la cola de inputs para que la maquina de estados gestione*/
+   xQueueSendFromISR(queue_inputs,&input, &xHigherPriorityTaskWoken);
 
 }
 
 
-
+//----------------------------------------------------------------------------------
 
 //funciones para gestionar memoria dinamica
 
-// pido un bloque mas
+
+
+/*Solicito un bloque*/
+
 static void  get_new_block(obj_gp* obj)
 {
 	if( obj->index == 0)
@@ -139,23 +143,25 @@ static void  get_new_block(obj_gp* obj)
 
 
 
-/*libero los bloques*/
+/*libero los bloques utilizados*/
+
 void free_blocks(obj_gp* object)
 {
  //pensarla con tiempo
 	for(int8_t i=0; i<=(object->b_index); i++)
 	{
-		QMPool_put( &(object->POOL_MEMORY), object->BLOCKS_MEMORY[i] );
+		QMPool_put( &(object->POOL_MEMORY), &(object->BLOCKS_MEMORY[i]) );
 	}
 
 }
 
 
 
+//-------------------------------------------------------------------------------
+
+
 void save_char(obj_gp* obj,char c)
 {
-
-	//GUARDO EL CHAR DONDE CORRESPONDE
 
 	obj->BLOCKS_MEMORY[obj->b_index][obj->index] = c;
 	//despues de guardar el char debo, index ++ y pasar de block si es necesario
@@ -171,16 +177,10 @@ void save_char(obj_gp* obj,char c)
 
 
 
-
-
-
-
-
 static void _init_state_machine(obj_gp*  object)
 {
 	/*El sistema siempre empieza en estado IDLE*/
 	object->state = IDLE;
-	/*Escribir la logica de lo que debe pasar*/
 	//inicia el buffer
 	object->index = 0;
 
@@ -202,8 +202,6 @@ static void _init_frame_state(obj_gp*  object)
 {
 	/*Se detecto el inicio de una nueva trama*/
 	object->state = START_MESSAGE;
-	/*Escribir la logica de lo que debe pasar*/
-
 	//descarto todo el mensaje y empiezo de nuevo, deberia devolver los bloques pedidos
 	object->index = 0;
 	free_blocks(object);
@@ -216,15 +214,12 @@ static void _end_frame_state(obj_gp*  object)
 {
 	/*Se detecto el caracter de finalizacion*/
 	object->state = END_MESSAGE;
-	/*Escribir la logica de lo que debe pasar*/
-
-
 	//agrego caracter nulo al final de la string
 	save_char(object,0);
 
 
 	//mandar a queue_print el buffer
-	xQueueSend(queue_print,&(object->BLOCKS_MEMORY[0][0]),portMAX_DELAY);
+	xQueueSend(queue_print,&(object->BLOCKS_MEMORY),portMAX_DELAY);
 
 
 }
@@ -235,6 +230,7 @@ static void	 _processing_input(obj_gp*  object,char c)
 	/*Se detecto un caracter cualquiera.*/
 	 object->state = PROCESSING;
 	/*Escribir la logica de lo que debe pasar*/
+	 gpioToggle(LEDB);
 
 	//guardar el caracter en el buffer
 	save_char(object,c);
@@ -257,10 +253,10 @@ static void	 _processing_input(obj_gp*  object,char c)
 void gp_init(obj_gp*  object,uartMap_t uart)
 {
 
+	printf("INICIO SISTEMA\n");
 
-	printf("iniciamos el modulo \n");
 	//inicio tarea impresion
-	init_print_manager();
+//	init_print_manager();
 
 	object->uart = uart;
 		/*Se inicia la uart*/
@@ -271,8 +267,50 @@ void gp_init(obj_gp*  object,uartMap_t uart)
 	uartInterrupt(UART_USB, true);
 
 
-	 //inicia la maquina de estados
-    _init_state_machine(object);
+    // Creo la cola donde se enviaran los inputs
+    queue_inputs = xQueueCreate(4, sizeof(char));
+
+    // Gestion de errores de colas
+    configASSERT(queue_inputs != NULL);
+
+    // CreO la cola de impresion
+    queue_print = xQueueCreate(N_QUEUE, sizeof(char *));
+
+    // Gestion de errores de colas
+    configASSERT(queue_print != NULL);
+
+
+    BaseType_t res;
+
+
+        // Creo tarea que gestiona el print de salida
+        res = xTaskCreate(
+            print_manager,                 // Funcion de la tarea a ejecutar
+            (const char *)"print_manager", // Nombre de la tarea como String amigable para el usuario
+            configMINIMAL_STACK_SIZE * 8,  // Cantidad de stack de la tarea
+            0,                             // Parametros de tarea
+            tskIDLE_PRIORITY + 1,          // Prioridad de la tarea
+            0                              // Puntero a la tarea creada en el sistema
+        );
+
+        // Gestion de errores
+        configASSERT(res == pdPASS);
+
+
+
+    // Creo tarea que gestiona la maquina de estados
+       res = xTaskCreate(
+    		state_machine_manager,                 // Funcion de la tarea a ejecutar
+           (const char *)"state_machine", // Nombre de la tarea como String amigable para el usuario
+           configMINIMAL_STACK_SIZE * 8,  // Cantidad de stack de la tarea
+           (void*)object,                             // Parametros de tarea
+           tskIDLE_PRIORITY + 1,          // Prioridad de la tarea
+           0                              // Puntero a la tarea creada en el sistema
+       );
+
+       // Gestion de errores
+       configASSERT(res == pdPASS);
+
 
 
 
@@ -283,21 +321,32 @@ void gp_init(obj_gp*  object,uartMap_t uart)
 
 
 
+
+/*Funcion que cambia estados de la maquina de estados*/
+
 void change_state_machine(char input_char,obj_gp*  object)
 {
+
 	switch(input_char)
 	{
 			// si llego (
 		case SOM:
+			  gpioToggle(LED1);
+
 			 _init_frame_state(object);
 			break;
 
 			//si llego )
 		case EOM:
+
+			   gpioToggle(LED2);
+
 			_end_frame_state(object);
 			break;
 			//si llego otro caracter
 		default:
+			   gpioToggle(LED3);
+
 			_processing_input(object,input_char);
 			break;
 
@@ -308,7 +357,6 @@ void change_state_machine(char input_char,obj_gp*  object)
 
 
 
-/*Pero puede que nos convenga o nos pidan que hagamos un modulo por cada capa de abstraccion*/
 
 
 
