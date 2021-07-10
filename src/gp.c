@@ -51,7 +51,7 @@ static void _ISR_Processing( void *vargs )
    char input = uartRxRead( obj->uart);
 
    /*Funcion que cambia de estado la maquina*/
-   change_state_machine(input,&(obj->state));
+   change_state_machine(input,obj);
 
 
 
@@ -72,40 +72,55 @@ static void _ISR_Processing( void *vargs )
 
 
 
-static void _init_state_machine(GP_STATE_MACHINE  *state_machine)
+static void _init_state_machine(obj_gp*  object)
 {
 	/*El sistema siempre empieza en estado IDLE*/
-	(*state_machine) = IDLE;
-	/*Escribir la logia de lo que debe pasar*/
+	object->state = IDLE;
+	/*Escribir la logica de lo que debe pasar*/
+	//inicia el buffer
+	object->index = 0;
 
 }
 
 
 
-static void _init_frame_state(GP_STATE_MACHINE  *state_machine)
+static void _init_frame_state(obj_gp*  object)
 {
 	/*Se detecto el inicio de una nueva trama*/
-	(*state_machine) = START_MESSAGE;
-	/*Escribir la logia de lo que debe pasar*/
+	object->state = START_MESSAGE;
+	/*Escribir la logica de lo que debe pasar*/
 
+	//funcion para pedir un buffer al pool
+
+	//guardar el caracter en el buffer
+
+	//subir index una posicion
+	object->index +=1;
 }
 
 
-static void _end_frame_state(GP_STATE_MACHINE   *state_machine)
+static void _end_frame_state(obj_gp*  object)
 {
 	/*Se detecto el caracter de finalizacion*/
-	(*state_machine) = END_MESSAGE;
-	/*Escribir la logia de lo que debe pasar*/
+	object->state = END_MESSAGE;
+	/*Escribir la logica de lo que debe pasar*/
+
+	//mandar a queue_print el buffer
 
 
 }
 
 
-static void	 _processing_input(GP_STATE_MACHINE   *state_machine)
+static void	 _processing_input(obj_gp*  object)
 {
 	/*Se detecto un caracter cualquiera.*/
-	(*state_machine) = PROCESSING;
-	/*Escribir la logia de lo que debe pasar*/
+	 object->state = PROCESSING;
+	/*Escribir la logica de lo que debe pasar*/
+
+		//guardar el caracter en el buffer
+
+	 //subir index una posicion
+	 	object->index +=1;
 }
 
 
@@ -129,6 +144,8 @@ void gp_init(obj_gp*  object)
 		/*Se inicia la uart*/
 	   uartConfig(object->uart,object->baudrate );
 
+	   /*Index del mensaje inicia en zero*/
+	   _init_state_machine(object);
 	   // uart el paso de parametros para pasar la maquina de estado
 	   uartCallbackSet(UART_USB, UART_RECEIVE, _ISR_Processing,(void*)object);
 	   // Habilito todas las interrupciones de UART_USB
@@ -147,21 +164,22 @@ void gp_init(obj_gp*  object)
 
 
 
-void change_state_machine(char input_char,GP_STATE_MACHINE *state_machine)
+void change_state_machine(char input_char,obj_gp*  object)
 {
 	switch(input_char)
 	{
-
+			// si llego (
 		case SOM:
-			 _init_frame_state(state_machine);
+			 _init_frame_state(object);
 			break;
 
+			//si llego )
 		case EOM:
-			_end_frame_state(state_machine);
+			_end_frame_state(object);
 			break;
-
+			//si llego otro caracter
 		default:
-			_processing_input(state_machine);
+			_processing_input(object);
 			break;
 
 	}

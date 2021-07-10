@@ -67,8 +67,13 @@ typedef struct
 	/*MAQUINA DE ESTADOS*/
 		GP_STATE_MACHINE 	state;
 
+
 	/*El puerto que se va a utilizar*/
 		uartMap_t uart;
+
+		/*index*/
+
+		uint16_t index;
 
 		/*El baudrate del modulo*/
 		uint16_t 	baudrate;
@@ -107,7 +112,7 @@ void gp_init(obj_gp*  object);
  *
  * */
 
-void change_state_machine(char input, GP_STATE_MACHINE   *state_machine);
+void change_state_machine(char input, obj_gp*  object);
 
 
 
