@@ -150,6 +150,11 @@ typedef struct
  * */
 
 
+
+
+
+
+
 void gp_init(obj_gp*  object,uartMap_t uart);
 
 

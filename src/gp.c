@@ -10,9 +10,29 @@
 
 
 #include "gp.h"
-#include "sapi.h"
+
+
+
+
+
+#include "FreeRTOS.h"
+#include "FreeRTOSConfig.h"
+#include "task.h"
+#include "queue.h"
+
+
+#define N_QUEUE 10
+
+//definida en main, mejorar depues
+static   QueueHandle_t queue_print;
+
 
 /*Definiciones*/
+
+
+
+
+
 
 
 /*Variables privadas (global e static)*/
@@ -36,6 +56,44 @@
 
 
 
+static void print_manager(void *taskParmPtr)
+{
+    char *mensaje = NULL;
+
+    while (1)
+    {
+        xQueueReceive(queue_print, &mensaje, portMAX_DELAY);
+
+        printf("%s\n", mensaje);
+    }
+}
+static void init_print_manager(void)
+{
+
+    BaseType_t res;
+
+
+
+    // Creo tarea unica de impresion
+    res = xTaskCreate(
+        print_manager,                 // Funcion de la tarea a ejecutar
+        (const char *)"print_manager", // Nombre de la tarea como String amigable para el usuario
+        configMINIMAL_STACK_SIZE * 8,  // Cantidad de stack de la tarea
+        0,                             // Parametros de tarea
+        tskIDLE_PRIORITY + 1,          // Prioridad de la tarea
+        0                              // Puntero a la tarea creada en el sistema
+    );
+
+    // Gestion de errores
+    configASSERT(res == pdPASS);
+
+    // Crear cola
+    queue_print = xQueueCreate(N_QUEUE, sizeof(char *));
+
+    // Gestion de errores de colas
+    configASSERT(queue_print != NULL);
+}
+
 
 
 
@@ -54,8 +112,6 @@ static void _ISR_Processing( void *vargs )
    change_state_machine(input,obj);
 
 
-
-
 }
 
 
@@ -63,7 +119,7 @@ static void _ISR_Processing( void *vargs )
 
 //funciones para gestionar memoria dinamica
 
-// pido un blocke mas
+// pido un bloque mas
 static void  get_new_block(obj_gp* obj)
 {
 	if( obj->index == 0)
@@ -83,8 +139,8 @@ static void  get_new_block(obj_gp* obj)
 
 
 
-
-free_blocks(obj_gp* object)
+/*libero los bloques*/
+void free_blocks(obj_gp* object)
 {
  //pensarla con tiempo
 	for(int8_t i=0; i<=(object->b_index); i++)
@@ -95,7 +151,6 @@ free_blocks(obj_gp* object)
 }
 
 
-//tengo un bloque que aun no esta llego,lo uso
 
 void save_char(obj_gp* obj,char c)
 {
@@ -149,12 +204,10 @@ static void _init_frame_state(obj_gp*  object)
 	object->state = START_MESSAGE;
 	/*Escribir la logica de lo que debe pasar*/
 
-
 	//descarto todo el mensaje y empiezo de nuevo, deberia devolver los bloques pedidos
 	object->index = 0;
 	free_blocks(object);
 
-	//guardar el caracter en el buffer
 
 }
 
@@ -171,6 +224,7 @@ static void _end_frame_state(obj_gp*  object)
 
 
 	//mandar a queue_print el buffer
+	xQueueSend(queue_print,&(object->BLOCKS_MEMORY[0][0]),portMAX_DELAY);
 
 
 }
@@ -200,21 +254,25 @@ static void	 _processing_input(obj_gp*  object,char c)
 
 /*Inicio el modulo*/
 
-
 void gp_init(obj_gp*  object,uartMap_t uart)
 {
 
-		object->uart = uart;
-		/*Se inicia la uart*/
-	   uartConfig(uart,BAUDRATE );
-	   /*Index del mensaje inicia en zero*/
-	   _init_state_machine(object);
-	   // uart el paso de parametros para pasar la maquina de estado
-	   uartCallbackSet(UART_USB, UART_RECEIVE, _ISR_Processing,(void*)object);
-	   // Habilito todas las interrupciones de UART_USB
-	   uartInterrupt(UART_USB, true);
-	   /*Iniciamos el pool de memoria*/
 
+	printf("iniciamos el modulo \n");
+	//inicio tarea impresion
+	init_print_manager();
+
+	object->uart = uart;
+		/*Se inicia la uart*/
+	uartConfig(uart,BAUDRATE );
+
+	uartCallbackSet(uart, UART_RECEIVE, _ISR_Processing,(void*)object);
+	   // Habilito todas las interrupciones de UART_USB
+	uartInterrupt(UART_USB, true);
+
+
+	 //inicia la maquina de estados
+    _init_state_machine(object);
 
 
 
