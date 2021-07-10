@@ -76,6 +76,8 @@ static void _init_state_machine(GP_STATE_MACHINE  *state_machine)
 {
 	/*El sistema siempre empieza en estado IDLE*/
 	(*state_machine) = IDLE;
+	/*Escribir la logia de lo que debe pasar*/
+
 }
 
 
@@ -84,6 +86,8 @@ static void _init_frame_state(GP_STATE_MACHINE  *state_machine)
 {
 	/*Se detecto el inicio de una nueva trama*/
 	(*state_machine) = START_MESSAGE;
+	/*Escribir la logia de lo que debe pasar*/
+
 }
 
 
@@ -91,13 +95,17 @@ static void _end_frame_state(GP_STATE_MACHINE   *state_machine)
 {
 	/*Se detecto el caracter de finalizacion*/
 	(*state_machine) = END_MESSAGE;
+	/*Escribir la logia de lo que debe pasar*/
+
 
 }
 
 
 static void	 _processing_input(GP_STATE_MACHINE   *state_machine)
 {
+	/*Se detecto un caracter cualquiera.*/
 	(*state_machine) = PROCESSING;
+	/*Escribir la logia de lo que debe pasar*/
 }
 
 
