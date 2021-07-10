@@ -18,6 +18,14 @@
 
 ### Justificaciones
 
+Para disminuir la fragmentaci[on de memoria al minimo, se va a utilizar:
+
+<ul>
+ <li>Memory pools</li>
+ <li>Implementación de memoria dinámica heap4.c</li>
+</ul>
+
+
 Algoritmo de alocacion de memoria elegido es:  uso de Memory pools y el heap4.c
 
 
