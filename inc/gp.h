@@ -20,7 +20,10 @@
 #define 	SOM						'('
 #define 	EOM						')'
 #define		MAX_LEN					200
-
+#define 	BLOCK_SIZE				20
+#define 	N_BLOCKS_P_POOL			10
+#define		POOL_SIZE				200
+#define		BAUDRATE				115200
 
 
 
@@ -58,6 +61,44 @@ GP_STATE_MACHINE;
 
 
 
+/*IDEA CONCEPTUAL
+ *
+ * TENEMOS UN POOL_SIZE DE 2000
+ * Y UN BLOCK_SIZE 20, ENTONCES TENEMOS 50 BLOQUES DISPONIBLES
+ *
+ *
+ *
+ *
+ *ejemplo
+ *            !                    !
+ *1)          HOLA MUNDO, MENSAJE
+ *1)          DE PRUEBA           .
+ *2)
+ *3)
+ *
+ *
+ *
+ *
+ * */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /*Estructura del gestor de protocolos*/
@@ -67,32 +108,38 @@ typedef struct
 	/*MAQUINA DE ESTADOS*/
 		GP_STATE_MACHINE 	state;
 
-
-	/*El puerto que se va a utilizar*/
+		/*Uart*/
 		uartMap_t uart;
+
 
 		/*index*/
 
-		uint16_t index;
+		//posicion del ultimo caracter en el blog
+		uint8_t index;
 
-		/*El baudrate del modulo*/
-		uint16_t 	baudrate;
+		//index del pool de memoria utilizado
+		uint8_t  b_index;
+
+		//index del pool de memoria utilizado
+
+		uint8_t p_index;
+
 
 		/*El tiempo que espera que llegue un nuevo caracter en ms*/
 		TickType_t 	time_out;
 
 
-		/*Puntero a memoria para el pool*/
-		gp_buffer	Pounter_memory;
+		/*10 Pools de memoria*/
+		gp_buffer    BLOCKS_MEMORY[N_BLOCKS_P_POOL];
 
-		/*Size del pool de memoria*/
-		uint16_t pool_size;
 
-		/*uint16_t pool_block_size*/
-		uint16_t pool_block_size;
+		QMPool POOL_MEMORY;
+		/*array de punteros para bloques
+		 * TENEMOS 10 PUNTEROS Y A MEDIDA
+		 * QUE LO NECESITEMOS LLAMAREMOS A LA FUNCION get_block
+		 *
+		 * */
 
-		/*Pool de memoria*/
-		QMPool    Pool_memory;
 } obj_gp;
 
 
@@ -103,7 +150,7 @@ typedef struct
  * */
 
 
-void gp_init(obj_gp*  object);
+void gp_init(obj_gp*  object,uartMap_t uart);
 
 
 

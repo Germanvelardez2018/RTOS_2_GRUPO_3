@@ -11,8 +11,14 @@
 #include "FreeRTOS.h"
 #include "FreeRTOSConfig.h"
 #include "task.h"
-
+#include "queue.h"
 #include "sapi.h"
+
+
+
+
+
+#define N_QUEUE 10
 
 
 /*=====[Definition macros of private constants]==============================*/
@@ -25,6 +31,19 @@
 
 /*=====[Main function, program entry point after power on or reset]==========*/
 
+
+static QueueHandle_t queue_print;
+
+
+
+
+
+
+
+
+
+void init_print_manager(void);
+void print_manager(void *taskParmPtr);
 
 
 
@@ -48,15 +67,7 @@ int main( void )
 {
    boardInit();
 
-   // Create a task in freeRTOS with dynamic memory
-   xTaskCreate(
-      myTask,                     // Function that implements the task.
-      (const char *)"myTask",     // Text name for the task.
-      configMINIMAL_STACK_SIZE*2, // Stack size in words, not bytes.
-      0,                          // Parameter passed into the task.
-      tskIDLE_PRIORITY+1,         // Priority at which the task is created.
-      0                           // Pointer to the task created in the system
-   );
+   init_print_manager();
 
    vTaskStartScheduler(); // Initialize scheduler
 
@@ -66,4 +77,45 @@ int main( void )
    // microcontroller and is not called by any Operating System, as in the 
    // case of a PC program.
    return 0;
+}
+
+
+
+void print_manager(void *taskParmPtr)
+{
+    char *mensaje = NULL;
+
+    while (1)
+    {
+        xQueueReceive(queue_print, &mensaje, portMAX_DELAY);
+        taskENTER_CRITICAL();
+        printf("%s", mensaje);
+        taskEXIT_CRITICAL();
+    }
+}
+
+
+void init_print_manager(void)
+{
+
+    BaseType_t res;
+
+    // Creo tarea unica de impresion
+    res = xTaskCreate(
+        print_manager,                 // Funcion de la tarea a ejecutar
+        (const char *)"print_manager", // Nombre de la tarea como String amigable para el usuario
+        configMINIMAL_STACK_SIZE * 2,  // Cantidad de stack de la tarea
+        0,                             // Parametros de tarea
+        tskIDLE_PRIORITY + 1,          // Prioridad de la tarea
+        0                              // Puntero a la tarea creada en el sistema
+    );
+
+    // Gestion de errores
+    configASSERT(res == pdPASS);
+
+    // Crear cola
+    queue_print = xQueueCreate(N_QUEUE, sizeof(char *));
+
+    // Gestion de errores de colas
+    configASSERT(queue_print != NULL);
 }
