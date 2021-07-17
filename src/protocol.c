@@ -16,6 +16,35 @@
 SemaphoreHandle_t new_frame_signal;
 SemaphoreHandle_t mutex;
 
+
+
+
+
+/*@brief Inicia el modulo,configurando periferico y cargando la tarea
+ * @param Se envia una estructura con parametros de configuracion
+ *
+ */
+void init_protocol(protocolData_t* protocol_config)
+{
+	/*Funcion para inicializar el pool de memoria*/
+		poolInit();
+
+		/*Se crea la tarea para recibir tramas (se le debe pasar por parametro la uartConfig_t a utilizar)*/
+
+		xTaskCreate(wait_frame,                  // Funcion de la tarea a ejecutar
+				(const char *) "wait_frame", // Nombre de la tarea como String amigable para el usuario
+				configMINIMAL_STACK_SIZE * 6,   // Cantidad de stack de la tarea
+				protocol_config,                    // Parametros de tarea
+				tskIDLE_PRIORITY + 1,           // Prioridad de la tarea
+				0                         // Puntero a la tarea creada en el sistema
+				);
+
+}
+
+
+
+
+
 /**
  @brief Manejador del evento de recepcion de 1 byte via UART
  @param noUsado
@@ -92,7 +121,7 @@ void protocol_rx_event(void * pvParameters) {
 
  @param uartConfig_t
  */
-void procotol_x_init(protocolData_t * uartData) {
+void protocol_x_init(protocolData_t * uartData) {
 	/* CONFIGURO EL DRIVER */
 
 	/* Inicializar la UART_USB junto con las interrupciones de Tx y Rx */
@@ -141,7 +170,7 @@ void wait_frame(void * pvParameters) {
 
 	uartData = *(protocolData_t*) pvParameters;
 
-	procotol_x_init(&uartData);	//Se inicializa la comunicacion por UART y las interrupciones
+	protocol_x_init(&uartData);	//Se inicializa la comunicacion por UART y las interrupciones
 
 	while ( TRUE) {
 		protocol_wait_frame();		//Espera a que se reciba un frame completo.

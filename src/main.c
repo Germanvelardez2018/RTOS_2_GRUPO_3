@@ -30,18 +30,11 @@ int main(void) {
 
 	boardConfig();
 
-	/*Funcion para inicializar el pool de memoria*/
-	poolInit();
+	/*Iniciamos el modulo protocol*/
 
-	/*Se crea la tarea para recibir tramas (se le debe pasar por parametro la uartConfig_t a utilizar)*/
+	init_protocol(&uart_ONE);
 
-	xTaskCreate(wait_frame,                  // Funcion de la tarea a ejecutar
-			(const char *) "wait_frame", // Nombre de la tarea como String amigable para el usuario
-			configMINIMAL_STACK_SIZE * 2,   // Cantidad de stack de la tarea
-			&uart_ONE,                    // Parametros de tarea
-			tskIDLE_PRIORITY + 1,           // Prioridad de la tarea
-			0                         // Puntero a la tarea creada en el sistema
-			);
+
 
 	vTaskStartScheduler();
 

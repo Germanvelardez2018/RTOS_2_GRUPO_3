@@ -54,7 +54,9 @@ typedef struct {
 	uint16_t index;					//Counter of characters received by uart
 } protocolData_t;
 
-void procotol_x_init( protocolData_t * uartData );
+
+void init_protocol(protocolData_t* protocol_config);
+void protocol_x_init( protocolData_t * uartData );
 void protocol_wait_frame();
 void protocol_get_frame_ref(char** data, uint16_t* size);
 void protocol_discard_frame( protocolData_t * uartData );
