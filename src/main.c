@@ -19,7 +19,8 @@
 
 
 
-int main(void) {
+int main(void)
+{
 
 	/*Se define la uart a utilizar*/
 

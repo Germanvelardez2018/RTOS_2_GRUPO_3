@@ -47,7 +47,8 @@ mensaje_t guardarMensaje(mensaje_t mensaje)
 	{
 		strcpy(mensaje_pool, mensaje);
 		return mensaje_pool;
-	}else
+	}
+	else
 	{
 		return NULL;
 	}

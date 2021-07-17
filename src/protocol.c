@@ -13,6 +13,10 @@
 #include "semphr.h"
 #include "task.h"
 
+
+/*Capa 3 */
+#include "m_c3.h"
+
 SemaphoreHandle_t new_frame_signal;
 SemaphoreHandle_t mutex;
 
@@ -33,7 +37,7 @@ void init_protocol(protocolData_t* protocol_config)
 
 		xTaskCreate(wait_frame,                  // Funcion de la tarea a ejecutar
 				(const char *) "wait_frame", // Nombre de la tarea como String amigable para el usuario
-				configMINIMAL_STACK_SIZE * 6,   // Cantidad de stack de la tarea
+				configMINIMAL_STACK_SIZE * 12,   // Cantidad de stack de la tarea
 				protocol_config,                    // Parametros de tarea
 				tskIDLE_PRIORITY + 1,           // Prioridad de la tarea
 				0                         // Puntero a la tarea creada en el sistema
@@ -49,7 +53,8 @@ void init_protocol(protocolData_t* protocol_config)
  @brief Manejador del evento de recepcion de 1 byte via UART
  @param noUsado
  */
-void protocol_rx_event(void * pvParameters) {
+void protocol_rx_event(void * pvParameters)
+{
 	protocolData_t * uartData;
 
 	uartData = (protocolData_t*) pvParameters;
@@ -62,25 +67,29 @@ void protocol_rx_event(void * pvParameters) {
 	BaseType_t signaled = xSemaphoreTakeFromISR(mutex,
 			&xHigherPriorityTaskWoken);
 
-	if (signaled) {
+	if (signaled)
+	{
 		if ( FRAME_MAX_SIZE - 1 == uartData->index)	//Se reinicia por haber alcanzado el maximo largo de caracteres permitido.
-				{
+		{
 			/* reinicio el paquete */
 			uartData->index = 0;
 		}
 
 		if (c == SOM)						//Se leyo un Start Of Message
 		{
-			if (uartData->index != 0) {
+			if (uartData->index != 0)
+			{
 				/* fuerzo el arranque del frame (descarto lo anterior)*/
 				uartData->index = 0;
 			}
 
 			uartData->index++;
-		} else if (c == EOM)					//Se leyo un End Of Message
+		}
+		else if (c == EOM)					//Se leyo un End Of Message
 		{
 			/* solo cierro el fin de frame si al menos alcanzo la longitud minima del frame.*/
-			if (uartData->index >= FRAME_MIN_SIZE) {
+			if (uartData->index >= FRAME_MIN_SIZE)
+			{
 				/* se termino el paquete - se termina con un '\0' */
 				uartData->buffer[(uartData->index) - 1] = '\0';
 
@@ -93,19 +102,26 @@ void protocol_rx_event(void * pvParameters) {
 				/* señalizo a la aplicacion */
 				xSemaphoreGiveFromISR(new_frame_signal,
 						&xHigherPriorityTaskWoken);
-			} else {
+			}
+			else
+			{
 				/* reinicio el paquete */
 				uartData->index = 0;
 			}
-		} else {
+		}
+		else
+		{
 			/* se guarda el dato si al menos se recibio un start.*/
-			if (uartData->index >= 1) {
+			if (uartData->index >= 1)
+			{
 				/* guardo el dato */
 				uartData->buffer[uartData->index - 1] = c;
 
 				/* incremento el indice */
 				uartData->index++;
-			} else {
+			}
+			else
+			{
 				/* no hago nada, descarto el byte */
 			}
 		}
@@ -121,7 +137,8 @@ void protocol_rx_event(void * pvParameters) {
 
  @param uartConfig_t
  */
-void protocol_x_init(protocolData_t * uartData) {
+void protocol_x_init(protocolData_t * uartData)
+{
 	/* CONFIGURO EL DRIVER */
 
 	/* Inicializar la UART_USB junto con las interrupciones de Tx y Rx */
@@ -141,7 +158,8 @@ void protocol_x_init(protocolData_t * uartData) {
 /**
  @brief Espera indefinidamente por un paquete.
  */
-void protocol_wait_frame() {
+void protocol_wait_frame()
+{
 	xSemaphoreTake(new_frame_signal, portMAX_DELAY);
 	xSemaphoreTake(mutex, 0);
 }
@@ -149,7 +167,8 @@ void protocol_wait_frame() {
 /**
  @brief Una vez procesado el frame, descarta el paquete y permite una nueva recepcion.
  */
-void protocol_discard_frame(protocolData_t * uartData) {
+void protocol_discard_frame(protocolData_t * uartData)
+{
 	/* indico que se puede inciar un paquete nuevo */
 	uartData->index = 0;
 
@@ -163,8 +182,9 @@ void protocol_discard_frame(protocolData_t * uartData) {
 	uartCallbackSet(uartData->uart, UART_RECEIVE, protocol_rx_event, uartData);
 }
 
-void wait_frame(void * pvParameters) {
-
+void wait_frame(void * pvParameters)
+{
+	inicio_c3();
 	protocolData_t uartData;
 	mensaje_t mensaje;
 
@@ -172,23 +192,33 @@ void wait_frame(void * pvParameters) {
 
 	protocol_x_init(&uartData);	//Se inicializa la comunicacion por UART y las interrupciones
 
-	while ( TRUE) {
+	while ( TRUE)
+	{
 		protocol_wait_frame();		//Espera a que se reciba un frame completo.
 
+		/*Guardar dato en memoria dinamica*/
 		mensaje = guardarMensaje(uartData.buffer);
 
-		if (mensaje != NULL) {
+		if (mensaje != NULL)
+		{
 			/* para el printf */
-			printf("%s \n", mensaje);
+		//	printf("[protocol.c]%s \n", mensaje);
+			send_msg_to_c3(mensaje);
+
 			protocol_discard_frame(&uartData); //Habilita nuevamente las interrupciones para poder seguir recibiendo mensajes
-			liberarMemoria(mensaje);			//Se libera la memoria pedida
-		}else{
+
+
+			//libero la memoria en task_c
+			//liberarMemoria(mensaje);			//Se libera la memoria pedida
+		}
+		else
+		{
 			printf("Out of memory \n");
 		}
 
 		/* hago un blink para que se vea */
 		gpioToggle(LEDB);
-		vTaskDelay(100 / portTICK_RATE_MS);
+		vTaskDelay(25 / portTICK_RATE_MS);
 		gpioToggle(LEDB);
 
 	}
