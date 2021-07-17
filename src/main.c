@@ -1,52 +1,49 @@
 /*=============================================================================
- * Author: German Velardez <germanvelardez16@gmail.com>
- * Date: 2021/07/09
- * Version: 1.0
+ * Copyright (c) 2021
+ * All rights reserved.
+ * License: Free
+ * Date: 2021/10/03
+ * Version: v1.2
  *===========================================================================*/
-
-/*=====[Inclusions of function dependencies]=================================*/
-
-#include "main.h"
 
 #include "FreeRTOS.h"
 #include "FreeRTOSConfig.h"
+
 #include "task.h"
-#include "queue.h"
-#include "sapi.h"
-#include "gp.h"
+//#include "sapi.h"
+
+#include "semphr.h"
+#include "protocol.h"
 
 
 
 
 
+int main(void) {
+
+	/*Se define la uart a utilizar*/
+
+	static protocolData_t uart_ONE = { .uart = UART_USB, .baudRate = 115200, .index=0 };
 
 
+	/* Inicializar la placa */
 
+	boardConfig();
 
+	/*Funcion para inicializar el pool de memoria*/
+	poolInit();
 
+	/*Se crea la tarea para recibir tramas (se le debe pasar por parametro la uartConfig_t a utilizar)*/
 
-int main( void )
-{
-   boardInit();
+	xTaskCreate(wait_frame,                  // Funcion de la tarea a ejecutar
+			(const char *) "wait_frame", // Nombre de la tarea como String amigable para el usuario
+			configMINIMAL_STACK_SIZE * 2,   // Cantidad de stack de la tarea
+			&uart_ONE,                    // Parametros de tarea
+			tskIDLE_PRIORITY + 1,           // Prioridad de la tarea
+			0                         // Puntero a la tarea creada en el sistema
+			);
 
+	vTaskStartScheduler();
 
-   obj_gp protocolo ;
-
-   gp_init(&protocolo,UART_USB);
-
-
-
-   vTaskStartScheduler(); // Initialize scheduler
-
-   while( true ); // If reach heare it means that the scheduler could not start
-
-   // YOU NEVER REACH HERE, because this program runs directly or on a
-   // microcontroller and is not called by any Operating System, as in the 
-   // case of a PC program.
-   return 0;
+	return 0;
 }
-
-
-
-
-

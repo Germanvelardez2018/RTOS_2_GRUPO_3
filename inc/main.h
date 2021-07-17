@@ -1,41 +1,29 @@
 /*=============================================================================
- * Author: German Velardez <germanvelardez16@gmail.com>
+ * Authors: German Velardez <germanvelardez16@gmail.com>
+ *          Federico Meghinasso <fmeghi@gmail.com>
+ *          Matias Meghinasso <meghinasso@gmail.com>
  * Date: 2021/07/09
- * Version: 1.0
+ *
  *===========================================================================*/
 
-/*=====[Avoid multiple inclusion - begin]====================================*/
+
 
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
-/*=====[Inclusions of public function dependencies]==========================*/
+/*===============================[Inclusiones]===============================*/
 
-#include <stdint.h>
-#include <stddef.h>
+#include "FreeRTOS.h"
+#include "task.h"
+#include "sapi.h"
+#include "queue.h"
+#include "semphr.h"
+#include "FreeRTOSConfig.h"
 
-/*=====[C++ - begin]=========================================================*/
+/*=========================[Definiciones y macros]===========================*/
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#define USED_UART 				UART_USB
+#define UART_RATE 				115200
 
-/*=====[Definition macros of public constants]===============================*/
-
-/*=====[Public function-like macros]=========================================*/
-
-/*=====[Definitions of public data types]====================================*/
-
-/*=====[Prototypes (declarations) of public functions]=======================*/
-
-/*=====[Prototypes (declarations) of public interrupt functions]=============*/
-
-/*=====[C++ - end]===========================================================*/
-
-#ifdef __cplusplus
-}
-#endif
-
-/*=====[Avoid multiple inclusion - end]======================================*/
 
 #endif /* __GESTOR_DE_PROTOLOS_H__ */
