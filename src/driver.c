@@ -35,7 +35,7 @@ static void send_Block(char* block,driver_t* driver);
 //Tarea principal del modulo
 
 
- void driver_manager(void* params)
+ void driver_Task(void* params)
 {
 
 	char* buffer;

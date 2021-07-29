@@ -32,7 +32,6 @@ bool check_block(char* block);
 
 
 
-void change_format(char* block);
 
 
 

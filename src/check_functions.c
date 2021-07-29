@@ -8,15 +8,12 @@
 
 #include "check_functions.h"
 #include "sapi.h"
+
+
+
 bool check_block(char* block)
 {
  return	true;
 }
 
 
-
-
-void change_format(char* block)
-{
-
-}

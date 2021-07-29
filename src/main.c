@@ -55,7 +55,7 @@ int main(void)
 	driver_init(&driver);
 
 
-	xTaskCreate(driver_manager,                  // Funcion de la tarea a ejecutar
+	xTaskCreate(driver_Task,                  // Funcion de la tarea a ejecutar
 					(const char *) "wait_frame", // Nombre de la tarea como String amigable para el usuario
 					configMINIMAL_STACK_SIZE * 4,   // Cantidad de stack de la tarea
 					&driver,                    // Parametros de tarea

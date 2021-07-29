@@ -18,6 +18,17 @@
 #define		FRAME_MAX_SIZE  200
 #define 	FRAME_MIN_SIZE	7
 
+//FORMAT
+
+#define FPASCAL			'P'
+#define	FCAMEL			'C'
+#define	FSNAKE			'S'
+
+
+
+void change_format(char* block);
+
+
 
 
 #endif /* RTOS2_REPOSITORIO_OFICIAL_REPOSITORIO_GIT_INC_MSG_FORMAT_H_ */
