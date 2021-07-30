@@ -91,7 +91,7 @@ static void set_format(char format,char* block)
 static void set_pascal(char* block,uint8_t pos_init, uint8_t pos_end)
 {
 
-
+ //FALTA IMPLEMENTACION
 
 }
 

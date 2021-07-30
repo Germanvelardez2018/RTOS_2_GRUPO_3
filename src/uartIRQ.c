@@ -5,8 +5,11 @@
  * Date: 2021/07/09
  *
  *===========================================================================*/
+#include <string.h>
 #include "uartIRQ.h"
+
 #include "msg_format.h"
+
 
 
 /*Este modulo se considera CAPA 1 */
