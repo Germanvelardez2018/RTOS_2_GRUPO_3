@@ -178,11 +178,11 @@ static void send_Block(char* block,driver_t* driver)
 {
 	xQueueSend( driver->onTxQueue, &block, portMAX_DELAY ); //Envio a la cola de transmision el blocke a transmitir
 	taskENTER_CRITICAL();  //no permito que se modifique txcounter
-	    if ( driver->flow.tx_counter == 0 ) //si se esta enviando algo no llamo a la interrupcion para no interrumpir el delay
-	    {
-	        txInterruptEnable( driver );
-	    }
-	    taskEXIT_CRITICAL();
-	    uartSetPendingInterrupt( driver->uart );
+	if ( driver->flow.tx_counter == 0 ) //si se esta enviando algo no llamo a la interrupcion para no interrumpir el delay
+	 {
+	   txInterruptEnable( driver );
+	 }
+	taskEXIT_CRITICAL();
+	uartSetPendingInterrupt( driver->uart );
 
 }

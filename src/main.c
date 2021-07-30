@@ -12,8 +12,8 @@
 #include "task.h"
 //#include "sapi.h"
 
-#include "semphr.h"
-#include "protocol.h"
+//#include "semphr.h"
+//#include "protocol.h"
 
 #include "driver.h"
 

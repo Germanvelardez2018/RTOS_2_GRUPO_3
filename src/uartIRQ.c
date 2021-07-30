@@ -34,7 +34,7 @@ static void _processing_byte(char new_byte,driver_t* driver);
 
 bool_t txInterruptEnable( driver_t* driver )
 {
-	printf("configura interrupccion tx\n");
+	//printf("configura interrupccion tx\n");
 	switch (driver->uart )
 	    {
 	        case UART_GPIO:
@@ -58,7 +58,7 @@ bool_t txInterruptEnable( driver_t* driver )
 
 bool_t rxInterruptEnable( driver_t* driver)
 {
-	printf("configura interuccion rx\n");
+	//printf("configura interuccion rx\n");
 
 	switch (driver->uart )
 	    {
@@ -84,7 +84,7 @@ void onTxTimeOutCallback( TimerHandle_t params)
 {
 	BaseType_t xHigherPriorityTaskWoken;
 	xHigherPriorityTaskWoken = pdFALSE;
-	printf("\ntx timer\n");
+//	printf("\ntx timer\n");
 
 	// Obtenemos los datos de la UART seleccionada, aprovechando el campo reservado para el Timer ID.
 	driver_t* driver = ( driver_t* ) pvTimerGetTimerID( params );
@@ -115,19 +115,19 @@ void onTxTimeOutCallback( TimerHandle_t params)
 
 void onRxTimeOutCallback( TimerHandle_t params )
 {
-	printf("in timeout rx\n");
+	//printf("in timeout rx\n");
 
 	driver_t* driver =  (driver_t*)pvTimerGetTimerID( params);
 
 	// Inicio seccion critica
    taskENTER_CRITICAL();
-   printf("uart:%d\n",driver->uart);
-   printf("buffer:%s\n",(driver->flow.rxBlock));
+//   printf("uart:%d\n",driver->uart);
+//   printf("buffer:%s\n",(driver->flow.rxBlock));
   //Verificar que tengamos un bloque de mensaje cerrado, en caso contrario descartar
 	//Tengo bloque cerrado y listo para enviar. Mandarlo por la queue
   if(driver->flow.state ==FLOW_CLOSE )
   {
-		printf("envio  buffer\n");
+	//	printf("envio  buffer\n");
 
 	  xQueueSend(driver->onRxQueue,( void * ) &(driver->flow.rxBlock), 0);
 	  driver->flow.state = FLOW_NOT_INIT;
@@ -142,7 +142,7 @@ void onRxTimeOutCallback( TimerHandle_t params )
   }
   else
   {// Paso al time out y el bloque no esta cerrado, descartar
-	  printf("descarto buffer\n");
+	//  printf("descarto buffer\n");
 	  _discard_block(driver);
 
 
@@ -175,7 +175,7 @@ static void _onRxCallback( void *param )
 	  {
 	    // Obtenemos el byte de la UART seleccionada
 		char new_byte =  uartRxRead( driver->uart );
-		printf("[isr]%c\n",new_byte);
+	//	printf("[isr]%c\n",new_byte);
 		_processing_byte(new_byte,(driver_t*)driver);
 	  }
 	 else
@@ -255,13 +255,13 @@ static void _processing_byte(char new_byte,driver_t* driver)
 
 		        case SOM:
 		        	/*Inicio de mensaje*/
-		        	printf("init block\n");
+		        //	printf("init block\n");
 		        	_init_block(driver);
 		        	break;
 
 		        case EOM:
 		        	 /*Final de mensaje*/
-		        	printf("close block\n");
+		       // 	printf("close block\n");
 		        	_close_block(driver);
 		        	break;
 
@@ -303,7 +303,7 @@ static void _add_newbyte_in_block(char new_byte, driver_t* driver)
 	//Se recibio un SOM?
 	 if(driver->flow.state == FLOW_INIT)
 	{
-		 printf("add\n");
+	//	 printf("add\n");
 	  //Es un caracter valido?
 	  //guardo el caracter nuevo
 	  driver->flow.rxBlock[driver->flow.rxLen] = new_byte;

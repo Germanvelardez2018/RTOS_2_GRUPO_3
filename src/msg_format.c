@@ -18,7 +18,8 @@
  *
  * */
 
-static char detect_format(char* block);
+
+static char detect_format(char* block,uint8_t pos_init, uint8_t pos_end);
 
 
 static void set_pascal(char* block,uint8_t pos_init, uint8_t pos_end);
@@ -110,7 +111,7 @@ static void set_snake(char* block,uint8_t pos_init, uint8_t pos_end)
 }
 /* si todos los caracteres del mensaje son minusculas o '_', entonces el mensaje es snake_case
  * si el primer caracter del mensaje es Mayuscula, entonces es PascalCase
- * por descarte si no es PascalCase y no es snake_case es camelCase
+ * por descarte si no es PascalCase y no es snake_case, entonces es camelCase
  *
  *  A = 65        a = 97
  *  B = 66		  b = 98  y sigue
@@ -130,6 +131,9 @@ static bool isPascal(char* block,uint8_t pos_init)
 
 	return res;
 }
+
+
+
 static bool isSnake(char* block,uint8_t pos_init, uint8_t pos_end)
 {
 	for(uint8_t pos = pos_init; pos< pos_end; pos ++)
@@ -141,12 +145,34 @@ static bool isSnake(char* block,uint8_t pos_init, uint8_t pos_end)
 	}
 	return false;
 }
+/*
+ * Detecta el formato del mensaje:
+ *
+ * return : FCAMEL     'C'
+ * 			FPASCAL	   'P'
+ * 			FSNAKE     'S'
+ * */
 
 
-static char detect_format(char* block)
+static char detect_format(char* block,uint8_t pos_init, uint8_t pos_end)
 {
-	/*COmpletar*/
+	char format =FCAMEL; //es CAMELCASE por descarte
 
 
-	return 'c';
+	if(isPascal(block,pos_init))
+	{
+		format = FPASCAL;
+
+	}
+	else
+	{
+		if (isSnake(block,pos_init,pos_end))
+		{
+		 format = FSNAKE;
+		}
+	}
+
+	return format;
+
+
 }
