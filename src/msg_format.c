@@ -5,12 +5,9 @@
  *      Author: gvelardez
  */
 
-
-
 #include "msg_format.h"
 
 #include "sapi.h"
-
 
 /*   Formato del mensaje
  *
@@ -18,69 +15,85 @@
  *
  * */
 
+static char detect_format(char* block, uint8_t pos_init, uint8_t pos_end);
 
-static char detect_format(char* block,uint8_t pos_init, uint8_t pos_end);
+static void set_pascal(char* block, uint8_t pos_init, uint8_t pos_end);
 
+static void set_camel(char* block, uint8_t pos_init, uint8_t pos_end);
 
-static void set_pascal(char* block,uint8_t pos_init, uint8_t pos_end);
+static void set_snake(char* block, uint8_t pos_init, uint8_t pos_end);
 
+static void set_format(char format, char* block);
 
-static void set_camel(char* block,uint8_t pos_init, uint8_t pos_end);
+static char mayus_to_min(char mayus);
 
+static char min_to_mayus(char min);
 
-static void set_snake(char* block,uint8_t pos_init, uint8_t pos_end);
+static char mayus_to_min(char mayus) {
 
+	char min;
 
+	if (mayus >= 'A' && mayus <= 'Z') {
+		min = mayus - 'A' + 'a';
+	} else {
+		return mayus;
+	}
 
+	return min;
 
-static void set_format(char format,char* block);
+}
 
-void change_format(char* block)
-{
+static char min_to_mayus(char min) {
+
+	char mayus;
+
+	if (min >= 'a' && min <= 'z') {
+		mayus = min - 'a' + 'A';
+	} else {
+		return min;
+	}
+
+	return mayus;
+
+}
+
+void change_format(char* block) {
 
 	// el byte que indica el formato que debe tener la salida
 	char C = block[4];
 
+	set_format(C, block);
 	//
-
-
 
 }
 
-
-static void set_format(char format,char* block)
-{
+static void set_format(char format, char* block) {
 
 	//el string que necesitamos modificar empieza en pos=5
-	uint8_t pos_init= 5;
+	uint8_t pos_init = 5;
 
 	//el mensaje termina dos bytes antes del valor de len
 
-	uint8_t pos_end = strlen(block)-2;
+	uint8_t pos_end = strlen(block) - 2;
 
-	switch(format)
-	{
-
+	switch (format) {
 
 	case FPASCAL:
-				set_pascal(block,pos_init,pos_end );
-				break;
+		set_pascal(block, pos_init, pos_end);
+		break;
 	case FCAMEL:
-				set_camel(block,pos_init,pos_end);
-				break;
+		set_camel(block, pos_init, pos_end);
+		break;
 	case FSNAKE:
-				set_snake(block,pos_init,pos_end);
-				break;
+		set_snake(block, pos_init, pos_end);
+		break;
 
 	default:
-				break;
+		break;
 
 	}
 
 }
-
-
-
 
 /*Funciones privadas*/
 
@@ -88,25 +101,40 @@ static void set_format(char format,char* block)
  *
  *
  * */
-static void set_pascal(char* block,uint8_t pos_init, uint8_t pos_end)
-{
-
- //FALTA IMPLEMENTACION
-
-}
-
-
-static void set_camel(char* block,uint8_t pos_init, uint8_t pos_end)
-{
-	//el string que necesitamos modificar empieza en pos=5
+static void set_pascal(char* block, uint8_t pos_init, uint8_t pos_end) {
+	for (uint8_t pos = pos_init; pos < pos_end; pos++) {
+		if (block[pos] == ' ' || block[pos] == '_') {
+			block[pos] = min_to_mayus(block[pos + 1]);
+			pos++;
+		} else if (pos == 1) {
+			block[pos] = min_to_mayus(block[pos]);
+		}
+	}
 
 }
 
+static void set_camel(char* block, uint8_t pos_init, uint8_t pos_end) {
 
-static void set_snake(char* block,uint8_t pos_init, uint8_t pos_end)
-{
-	//el string que necesitamos modificar empieza en pos=5
+	for (uint8_t pos = pos_init; pos < pos_end; pos++) {
+		if (block[pos] == ' ' || block[pos] == '_') {
+			block[pos] = min_to_mayus(block[pos + 1]);
+			pos++;
+		} else if (pos == 1) {
+			block[pos] = mayus_to_min(block[pos]);
+		}
+	}
 
+}
+
+static void set_snake(char* block, uint8_t pos_init, uint8_t pos_end) {
+
+	for (uint8_t pos = pos_init; pos < pos_end; pos++) {
+		if (block[pos] == ' ') {
+			block[pos] =  '_';
+		} else {
+			block[pos] = mayus_to_min(block[pos]);
+		}
+	}
 
 }
 /* si todos los caracteres del mensaje son minusculas o '_', entonces el mensaje es snake_case
@@ -118,28 +146,17 @@ static void set_snake(char* block,uint8_t pos_init, uint8_t pos_end)
  *  el ' _ ' es 95
  * */
 
-
-
-
-static bool isPascal(char* block,uint8_t pos_init)
-{
-
+static bool isPascal(char* block, uint8_t pos_init) {
 
 	//si se cumple esta condiciones el primer elemento es mayuscula, entonces es pascalcase
-	bool res = (block[pos_init]<= 97)?true:false;
-
+	bool res = (block[pos_init] <= 97) ? true : false;
 
 	return res;
 }
 
-
-
-static bool isSnake(char* block,uint8_t pos_init, uint8_t pos_end)
-{
-	for(uint8_t pos = pos_init; pos< pos_end; pos ++)
-	{
-		if(block[pos] == '_')
-		{
+static bool isSnake(char* block, uint8_t pos_init, uint8_t pos_end) {
+	for (uint8_t pos = pos_init; pos < pos_end; pos++) {
+		if (block[pos] == '_') {
 			return true;
 		}
 	}
@@ -153,26 +170,18 @@ static bool isSnake(char* block,uint8_t pos_init, uint8_t pos_end)
  * 			FSNAKE     'S'
  * */
 
+static char detect_format(char* block, uint8_t pos_init, uint8_t pos_end) {
+	char format = FCAMEL; //es CAMELCASE por descarte
 
-static char detect_format(char* block,uint8_t pos_init, uint8_t pos_end)
-{
-	char format =FCAMEL; //es CAMELCASE por descarte
-
-
-	if(isPascal(block,pos_init))
-	{
+	if (isPascal(block, pos_init)) {
 		format = FPASCAL;
 
-	}
-	else
-	{
-		if (isSnake(block,pos_init,pos_end))
-		{
-		 format = FSNAKE;
+	} else {
+		if (isSnake(block, pos_init, pos_end)) {
+			format = FSNAKE;
 		}
 	}
 
 	return format;
-
 
 }
