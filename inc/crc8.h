@@ -13,14 +13,24 @@
 #include "sapi.h"
 
 
+/*=============================Declaracion Funciones Publicas================*/
 
-
+/*
+ * Funcion para pasar dos char que representan a un numero en hexa
+ * a un valor entero.
+ */
 uint8_t ASCII_to_int(char* stringCRC);
-
+/*
+ * Funcion para pasar un entero de dos caracteres a ASCII
+ */
 void  int_to_ASCII(uint8_t intCRC,char* stringCRC);
 
 
 uint8_t crc8_init(void);
+
+/*
+ * Funcion para calcular el crc8
+ */
 uint8_t crc8_calc(uint8_t val, void *buf, int cnt);
 
 
