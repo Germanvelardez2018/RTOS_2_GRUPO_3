@@ -59,9 +59,9 @@ Se modifico lo siguiente:
  <li>Se modificaron las implementaciones tanto de ISR como de iniciación del modulo protocol.</li>
  <li>Se agregaron los archivos msg_format(.h,.c) donde se implementan las funciones para cambiar de formato los string de texto</li>
  <li>Se agrego diagrama de sistema </li>
- <li>Se implementa timmers tanto para recepccion como para transmicion </li>
+ <li>Se implementa timmers tanto para recepccion como para transmisión </li>
  <li>Se completo las funciones para checkeo de formato valido del mensaje, secuencia y crc</li>
- <li>Se implemento la transmicion de mensaje mediante interrupcion </li>
+ <li>Se implemento la transmisión de mensaje mediante interrupcion </li>
 
 
 </ul>
