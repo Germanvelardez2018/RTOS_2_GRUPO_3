@@ -37,21 +37,16 @@ static void send_Block(char* block,driver_t* driver);
 
  void driver_Task(void* params)
 {
-
 	char* buffer;
 	driver_t* driver = (driver_t*) params;
 
 	while(1)
 	{
 		gpioToggle(CHECK_LED);
-
 		//Recibira los bloques de datos mediante queue onRxQueue (se considera capa 2 o 3)
-
 		xQueueReceive( driver->onRxQueue,&buffer,portMAX_DELAY ); //espero a que venga un bloque por la cola
-
 		bool check_ok = false;
 		if(buffer !=NULL) //No DEBERIA RECIBIR NULL,pero conviene validar
-
 		{
 		  // proceso el mensaje
 
@@ -63,18 +58,10 @@ static void send_Block(char* block,driver_t* driver);
 			send_Block(buffer,driver);
 			}
 
-
 			//ya libero el bloque en la funcion en el timer TX asociado con send_BLock()
-
-
-
-
 			vTaskDelay( 50 );
-
-
 		}
 		gpioToggle(CHECK_LED);
-
 	}
 
 
@@ -152,8 +139,6 @@ bool_t driver_init(driver_t* driver)
 
 
 /*Funciones privadas*/
-
-
 
 static bool process_block(char* block)
 {

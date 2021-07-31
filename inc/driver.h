@@ -42,6 +42,13 @@ typedef enum
 	FLOW_CLOSE
 } state_flow;
 
+
+
+typedef struct {
+
+}block_tx_words;
+
+
 typedef struct{
 
 	  state_flow state;         //Estado del buffer
