@@ -50,11 +50,7 @@ Se agrego lo siguiente:
  <li>Funciones de pool de memorias</li>
  <li>Funciones de comprobacion de CRC8,formato y secuencia valida.</li>
  <li>Se agrego modulo de capa 3 (m_c3.h, m_c3.c) donde se gestionan las tareas de esta capas.</li>
- <li>Funciones de comprobacion de CRC8,formato y secuencia valida.</li>
- <li>Se mejoro el formato de los comentarios para documentar</li>
- <li>Se agregaron los archivos msg_format(.h,.c) donde se implementan las funciones para cambiar de formato los string de texto</li>
-
-</ul>
+ 
 
 
 
