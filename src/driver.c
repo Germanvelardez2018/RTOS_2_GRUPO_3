@@ -11,6 +11,7 @@
 #include "uartIRQ.h"
 
 #include "check_functions.h"
+#include "msg_format.h"
 
 #define CHECK_LED 	LED1
 
@@ -48,14 +49,24 @@ static void send_Block(char* block,driver_t* driver);
 		bool check_ok = false;
 		if(buffer !=NULL) //No DEBERIA RECIBIR NULL,pero conviene validar
 		{
-		  // proceso el mensaje
 
-		  check_ok = process_block(buffer);
+			//checkeo formato, secuencia y CRC
+			check_ok = check_block(buffer);
+
 			if(check_ok)
 			{
-			//envio el bloque a transmicion
+			//envio el bloque a transmision
+			//solo cambio formato si el contenido del block es valido. Se libera bloque en la funcion
+
+			change_format(buffer);
 
 			send_Block(buffer,driver);
+			}
+
+			else // si el formato no es valido, descarto mensaje y libero memoria
+			{
+				free_block (driver,buffer);
+
 			}
 
 			//ya libero el bloque en la funcion en el timer TX asociado con send_BLock()

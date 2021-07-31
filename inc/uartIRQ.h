@@ -23,4 +23,8 @@ void onTxTimeOutCallback( TimerHandle_t );
 void onRxTimeOutCallback( TimerHandle_t );
 
 
+void free_block (driver_t* driver,char* block);
+
+
+
 #endif /* RTOS2_REPOSITORIO_OFICIAL_REPOSITORIO_GIT_INC_UARTIRQ_H_ */

@@ -83,6 +83,24 @@ bool_t rxInterruptEnable( driver_t* driver)
 	    return ( TRUE );
 }
 
+
+
+
+void free_block (driver_t* driver, char*block)
+{
+  //sirve para liberar block que vienen de driver o block que viene por parametro
+	if( block == NULL)
+	{
+		// Libero el bloque de memoria que ya fue trasmitido
+			QMPool_put( &(driver->memory.pool), driver->flow.txBlock );
+	}
+	else
+	{
+			QMPool_put( &(driver->memory.pool), block );
+	}
+
+}
+
 void onTxTimeOutCallback( TimerHandle_t params)
 {
 	BaseType_t xHigherPriorityTaskWoken;
@@ -98,7 +116,8 @@ void onTxTimeOutCallback( TimerHandle_t params)
 	 //uartTxWrite( selectedUart->uartValue,'\n' );
 
 	 // Libero el bloque de memoria que ya fue trasmitido
-	 QMPool_put( &(driver->memory.pool), driver->flow.txBlock );
+	 //QMPool_put( &(driver->memory.pool), driver->flow.txBlock );
+	 free_block (driver,NULL);
 
 	 driver->flow.tx_counter = 0; //Reinicio el contador de bytes transmitidos para la siguiente transmision
 	 taskEXIT_CRITICAL(); // Fin de seccion critica

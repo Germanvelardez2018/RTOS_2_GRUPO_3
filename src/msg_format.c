@@ -6,7 +6,7 @@
  */
 
 #include "msg_format.h"
-
+#include <string.h>
 #include "sapi.h"
 #include "ctype.h"
 
@@ -97,6 +97,7 @@ static void set_format(char format, char *block)
 		break;
 
 	default:
+		//formato invalido de C
 		break;
 	}
 }

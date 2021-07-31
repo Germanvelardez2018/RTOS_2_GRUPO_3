@@ -14,6 +14,15 @@
 </ul>
 
 
+<h4 style="text-align:center;">
+    Grafico del sistema
+</h4>
+=======================================================
+<figure style="float: center">
+  <img src="https://user-images.githubusercontent.com/68166291/127549597-4ab497f7-ba4e-4abc-a742-df3bfea10ee6.png" >
+  
+</figure>
+
 
 
 ### Justificaciones
@@ -69,16 +78,6 @@ Se modifico lo siguiente:
 
      
  
-<h4 style="text-align:center;">
-    Grafico del sistema
-</h4>
-=======================================================
-<figure style="float: center">
-  <img src="https://user-images.githubusercontent.com/68166291/127549597-4ab497f7-ba4e-4abc-a742-df3bfea10ee6.png"  
-     >
-  
-</figure>
-
 
 
 
