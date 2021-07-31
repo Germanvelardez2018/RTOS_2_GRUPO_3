@@ -150,6 +150,7 @@ static void set_camel(char *block, uint8_t pos_init, uint8_t pos_end)
 	block[pos_sec] = '\0'; //Se cierra el nuevo string
 }
 
+//!Corregir snake_case poruqe se pierde un caracter por no acomodar el tamaño de block.
 static void set_snake(char *block, uint8_t pos_init, uint8_t pos_end)
 {
 	uint8_t pos_prim = pos_init;
