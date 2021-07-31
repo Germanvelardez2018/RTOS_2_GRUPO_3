@@ -163,9 +163,11 @@ static void set_snake(char *block, uint8_t pos_init, uint8_t pos_end)
 		}
 		else if (isupper(block[pos_prim]))
 		{
+			block[pos_sec] = '_';
+			pos_sec++;
 			block[pos_sec] = mayus_to_min(block[pos_prim]);
 		}else {
-			block[pos_sec] = mayus_to_min(block[pos_sec]);
+			block[pos_sec] = mayus_to_min(block[pos_prim]);
 		}
 		pos_sec++;
 	}
