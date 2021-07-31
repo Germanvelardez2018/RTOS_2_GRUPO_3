@@ -125,7 +125,7 @@ static void set_pascal(char *block, uint8_t pos_init, uint8_t pos_end)
 		}
 		pos_sec++;
 	}
-	block[pos_sec] = '/0'; //Se cierra el nuevo string
+	block[pos_sec] = '\0'; //Se cierra el nuevo string
 }
 
 static void set_camel(char *block, uint8_t pos_init, uint8_t pos_end)
@@ -142,11 +142,11 @@ static void set_camel(char *block, uint8_t pos_init, uint8_t pos_end)
 		}
 		else if (pos_prim == 1)
 		{
-			block[pos_sec] = mayus_to_min(block[pos]);
+			block[pos_sec] = mayus_to_min(block[pos_prim]);
 		}
 		pos_sec++;
 	}
-	block[pos_sec] = '/0'; //Se cierra el nuevo string
+	block[pos_sec] = '\0'; //Se cierra el nuevo string
 }
 
 static void set_snake(char *block, uint8_t pos_init, uint8_t pos_end)
@@ -160,15 +160,15 @@ static void set_snake(char *block, uint8_t pos_init, uint8_t pos_end)
 		{
 			block[pos_sec] = '_';
 		}
-		else if (isupper(block[pos_prim])
+		else if (isupper(block[pos_prim]))
 		{
-			block[pos_sec] = mayus_to_min(block[pos]);
+			block[pos_sec] = mayus_to_min(block[pos_prim]);
 		}else {
 			block[pos_sec] = mayus_to_min(block[pos_sec]);
 		}
 		pos_sec++;
 	}
-	block[pos_sec] = '/0'; //Se cierra el nuevo string
+	block[pos_sec] = '\0'; //Se cierra el nuevo string
 
 }
 /* si todos los caracteres del mensaje son minusculas o '_', entonces el mensaje es snake_case
