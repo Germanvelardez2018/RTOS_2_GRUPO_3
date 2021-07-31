@@ -8,6 +8,22 @@
 #include "crc8.h"
 
 
+/*============================Declaracion Defines============================*/
+
+#define ASCII_A_POS 		41
+#define ASCCI_NUM_TO_INT 	30
+#define ASCII_LETTER_TO_INT 31
+#define BASE_DECIMAL 		10
+#define BASE_HEX 			16
+
+/*============================Declaracion Funciones Privadas================*/
+
+uint8_t char_to_int(char hex);
+
+char int_to_char(int numero);
+
+
+
 /*
  *
  * ANCII-------------------->DECIMAL
@@ -28,59 +44,70 @@
 
 
 
+/*=============================Declaracion Funciones Publicas================*/
 
-/*
- * @brief pasamos un char[2] a un int8_t:
- * 	Ejemplo:      "02" -> 0x02
- *
- * @param     CRC8 son 2 char
- * */
 
-uint8_t ASCII_to_int(char* CRC8)
+uint8_t ASCII_to_int(char* stringCRC)
 {
-	uint8_t crc8;
 
-	uint8_t d_1 = (((uint8_t)CRC8[0])<40)?((uint8_t)CRC8[0]) -30 :((uint8_t)CRC8[0]) -31 ;
-	uint8_t d_2 = (((uint8_t)CRC8[1])<40)?((uint8_t)CRC8[1]) -30 :((uint8_t)CRC8[1]) -31 ;
+	return ((char_to_int(stringCRC[1])*BASE_DECIMAL) + char_to_int(stringCRC[0])) ;
+}
 
-	crc8 = d_1 * 16 + d_2;
-	return crc8;
+
+uint8_t char_to_int(char hex)
+{
+	if (((uint8_t)hex) < ASCII_A_POS)
+	{
+		return (((uint8_t)hex) - ASCCI_NUM_TO_INT);
+	}else
+	{
+		return (((uint8_t)hex) - ASCII_LETTER_TO_INT);
+	}
 }
 
 
 
-/*
- * @brief pasamos un int8_t a un char[2]
- * 	Ejemplo:      0x02 -> "02"
- *
- * @param     CRC8 es un int8_t
- * */
-
-void  int_to_ASCII(uint8_t CRC8,char* crc8)
+void  int_to_ASCII(uint8_t intCRC,char* stringCRC)
 {
-	//falta implementar, sera necesario cuando quiera transmitir datos
+	stringCRC[1] = int_to_char(intCRC / 16);
+	stringCRC[0] = int_to_char(intCRC % 16);
+}
+
+char int_to_char(int numero)
+{
+	if (numero < BASE_DECIMAL)
+	{
+		return((char)(numero + ASCCI_NUM_TO_INT));
+	}else
+	{
+		return((char)(numero + ASCII_LETTER_TO_INT));
+	}
 }
 
 
+static uint8_t crc8_small_table[16] = {
+    0x00, 0x07, 0x0e, 0x09, 0x1c, 0x1b, 0x12, 0x15,
+    0x38, 0x3f, 0x36, 0x31, 0x24, 0x23, 0x2a, 0x2d
+};
 
-/*
- * @brief calculamos crc8
- * @source https://www.it-swarm-es.com/es/c/crc-definitivo-para-c/1070869379/
- * */
-
-uint8_t calculate_crc8(char* data,uint8_t size)
+uint8_t
+crc8_init(void)
 {
-	uint8_t crc;
-    if (data == NULL)
-        return 0;
-    crc = ~crc & 0xff;
-    while (size--)
-    {
-        crc ^= *data++;
-        for (uint8_t k = 0; k < 8; k++)
-            crc = crc & 1 ? (crc >> 1) ^ 0xb2 : crc >> 1;
-    }
-    return crc ^ 0xff;
+    return 0xff;
+}
+
+uint8_t
+crc8_calc(uint8_t val, void *buf, int cnt)
+{
+	int i;
+	uint8_t *p = buf;
+
+	for (i = 0; i < cnt; i++) {
+		val ^= p[i];
+		val = (val << 4) ^ crc8_small_table[val >> 4];
+		val = (val << 4) ^ crc8_small_table[val >> 4];
+	}
+	return val;
 }
 
 

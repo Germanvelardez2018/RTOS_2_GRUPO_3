@@ -90,7 +90,7 @@ static bool check_CRC(char* block)
 	int crc_mensaje = 0;
 	crc_mensaje = ASCII_to_int(CRC);
 	//calculo el CRC yo mismo
-	int8_t crc_calculado = calculate_crc8(block,size);
+	int8_t crc_calculado = crc8_calc(0,block,size);
 	if( crc_mensaje != crc_calculado)
 	{
 		res = false;

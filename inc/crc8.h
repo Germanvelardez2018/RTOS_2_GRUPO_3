@@ -15,12 +15,13 @@
 
 
 
-uint8_t ASCII_to_int(char* CRC8);
+uint8_t ASCII_to_int(char* stringCRC);
 
-void  int_to_ASCII(uint8_t CRC8,char* crc8);
+void  int_to_ASCII(uint8_t intCRC,char* stringCRC);
 
 
-uint8_t calculate_crc8(char* buffer,uint8_t size);
+uint8_t crc8_init(void);
+uint8_t crc8_calc(uint8_t val, void *buf, int cnt);
 
 
 
