@@ -35,7 +35,7 @@ static void send_block(char* block,driver_t* driver);
 
 /*================================Funciones publicas==============================*/
 
- void driver_Task(void* params)
+ void driver_task(void* params)
 {
 	char* buffer;
 	driver_t* driver = (driver_t*) params;
@@ -44,15 +44,16 @@ static void send_block(char* block,driver_t* driver);
 	{
 		gpioToggle(CHECK_LED);
 
-		/*Se recibiran los bloques de datos mediante queue onRxQueue (se considera capa 2 o 3)*/
-		xQueueReceive( driver->onRxQueue,&buffer,portMAX_DELAY ); //Se espera a que venga un bloque por la cola
-		bool check_ok = false;
+		/* Se recibiran los bloques de datos mediante queue onRxQueue (se considera capa 2 o 3)
+		 * Se espera a que venga un bloque por la cola*/
+		xQueueReceive( driver->onRxQueue,&buffer,portMAX_DELAY );
+		bool checkOk = false;
 		if(buffer !=NULL) //No DEBERIA RECIBIR NULL,pero conviene validar
 		{
 			/* Se controla formato, secuencia y CRC*/
-			check_ok = check_block(buffer);
+			checkOk = check_block(buffer);
 
-			if(check_ok)
+			if(checkOk)
 			{
 				/* Se envia el bloque a transmision
 				 * Solo se cambia formato si el contenido del block es valido. Se libera bloque en la funcion*/
@@ -159,9 +160,12 @@ void led_task(void* params)
 
 static void send_block(char* block,driver_t* driver)
 {
-	xQueueSend( driver->onTxQueue, &block, portMAX_DELAY ); //Envio a la cola de transmision el blocke a transmitir
-	taskENTER_CRITICAL();  //no permito que se modifique txcounter
-	if ( driver->flow.tx_counter == 0 ) //si se esta enviando algo no llamo a la interrupcion para no interrumpir el delay
+	/* Se envia a la cola de transmision el block a transmitir*/
+	xQueueSend( driver->onTxQueue, &block, portMAX_DELAY );
+	/* No se permite que se modifique txcounter*/
+	taskENTER_CRITICAL();
+	/* Si se esta enviando algo no se llama a la interrupcion para no interrumpir el delay*/
+	if ( driver->flow.tx_counter == 0 ) //
 	 {
 	   txInterruptEnable( driver );
 	 }

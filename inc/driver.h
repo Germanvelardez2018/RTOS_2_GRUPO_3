@@ -85,7 +85,7 @@ typedef struct
 
 bool_t driver_init(driver_t* driver);
 
-void driver_Task(void* params);
+void driver_task(void* params);
 
 void led_task(void* params);
 

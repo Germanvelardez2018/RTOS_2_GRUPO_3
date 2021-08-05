@@ -13,8 +13,7 @@
 #include "crc8.h"
 
 
-
-
+/*============================Declaracion de funciones privadas====================*/
 
 static bool check_secuence(char* block);
 
@@ -22,7 +21,7 @@ static bool check_CRC(char* block);
 
 static bool check_msg(char* block);
 
-
+/*================================Funciones publicas==============================*/
 
 bool check_block(char* block)
 {
@@ -48,6 +47,9 @@ bool check_block(char* block)
 
  return	true;
 }
+
+
+/*================================Funciones privadas================================*/
 
 /*Secuencia debe ser numero*/
 static bool check_secuence(char* block)

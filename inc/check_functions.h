@@ -21,9 +21,19 @@
 
 #include "driver.h"
 
+
+/*==================================Declaracion Defines============================*/
+
+#define ERROR_INVALID_DATA 		0
+#define ERROR_INVALID_OPCODE	1
+#define ERROR_SYSTEM			2
+
+
 #define FORMAT_CC		'C'
 #define	FORMAT_P		'P'
 #define FORMAT_S		'S'
+
+/*================================Funciones publicas==============================*/
 
 /*Block es todo el bloque, secuencias! C ! mensaje ! CRC*/
 
