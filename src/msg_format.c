@@ -118,11 +118,11 @@ static void set_pascal(char *block, uint8_t pos_init, uint8_t pos_end)
 		if (block[pos_prim] == ' ' || block[pos_prim] == '_')
 		{
 			pos_prim++;
-			block[pos_sec] = min_to_mayus(block[pos_prim]);
+			block[pos_sec] = toupper(block[pos_prim]);
 		}
 		else if (pos_prim == 1)
 		{
-			block[pos_sec] = min_to_mayus(block[pos_prim]);
+			block[pos_sec] = toupper(block[pos_prim]);
 		}
 		pos_sec++;
 	}
@@ -139,11 +139,11 @@ static void set_camel(char *block, uint8_t pos_init, uint8_t pos_end)
 		if (block[pos_prim] == ' ' || block[pos_prim] == '_')
 		{
 			pos_prim++;
-			block[pos_sec] = min_to_mayus(block[pos_prim]);
+			block[pos_sec] = toupper(block[pos_prim]);
 		}
 		else if (pos_prim == 1)
 		{
-			block[pos_sec] = mayus_to_min(block[pos_prim]);
+			block[pos_sec] = tolower(block[pos_prim]);
 		}
 		pos_sec++;
 	}
@@ -166,9 +166,9 @@ static void set_snake(char *block, uint8_t pos_init, uint8_t pos_end)
 		{
 			block[pos_sec] = '_';
 			pos_sec++;
-			block[pos_sec] = mayus_to_min(block[pos_prim]);
+			block[pos_sec] = tolower(block[pos_prim]);
 		}else {
-			block[pos_sec] = mayus_to_min(block[pos_prim]);
+			block[pos_sec] = tolower(block[pos_prim]);
 		}
 		pos_sec++;
 	}
