@@ -17,6 +17,9 @@
 
 #include "driver.h"
 
+/*==================================Declaracion Defines============================*/
+
+#define UART_BAUDRATE 115200
 
 
 /*===============================Programa Principal=============================*/
@@ -33,7 +36,7 @@ int main(void)
 
 
 	static driver_t driver={.uart = UART_USB,
-							.baudrate = 115200
+							.baudrate = UART_BAUDRATE
 							} ;
 
 	driver_init(&driver);

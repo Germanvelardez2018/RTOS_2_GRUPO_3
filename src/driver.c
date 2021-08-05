@@ -13,28 +13,27 @@
 #include "check_functions.h"
 #include "msg_format.h"
 
+/*==================================Declaracion Defines============================*/
+
 #define CHECK_LED 	LED1
+
+
+/*============================Declaracion de funciones privadas====================*/
+
 
 
 
 
 /*Recibe el bloque enviado por queue, debe verificar CRC8 y demas verificaciones
  *
- * uso la memoria dinamica del bloque recibido, escribo el nuevo contenido y lo vuelvo a wencviar para transmitir
+ * Se usa la memoria dinamica del bloque recibido, se escribe el nuevo contenido y se vuelve a enviar para transmitir.
  * Una vez transmitido, liberar.
  * */
 
-static bool process_block(char* block);
+static void send_block(char* block,driver_t* driver);
 
 
-
-
-
-
-static void send_Block(char* block,driver_t* driver);
-
-//Tarea principal del modulo
-
+/*================================Funciones publicas==============================*/
 
  void driver_Task(void* params)
 {
@@ -44,38 +43,34 @@ static void send_Block(char* block,driver_t* driver);
 	while(1)
 	{
 		gpioToggle(CHECK_LED);
-		//Recibira los bloques de datos mediante queue onRxQueue (se considera capa 2 o 3)
-		xQueueReceive( driver->onRxQueue,&buffer,portMAX_DELAY ); //espero a que venga un bloque por la cola
+
+		/*Se recibiran los bloques de datos mediante queue onRxQueue (se considera capa 2 o 3)*/
+		xQueueReceive( driver->onRxQueue,&buffer,portMAX_DELAY ); //Se espera a que venga un bloque por la cola
 		bool check_ok = false;
 		if(buffer !=NULL) //No DEBERIA RECIBIR NULL,pero conviene validar
 		{
-
-			//checkeo formato, secuencia y CRC
+			/*checkeo formato, secuencia y CRC*/
 			check_ok = check_block(buffer);
 
 			if(check_ok)
 			{
-			//envio el bloque a transmision
-			//solo cambio formato si el contenido del block es valido. Se libera bloque en la funcion
+				/*
+				 * Se envia el bloque a transmision
+				 * Solo se cambia formato si el contenido del block es valido. Se libera bloque en la funcion
+				 */
+				change_format(buffer);
 
-			change_format(buffer);
-
-			send_Block(buffer,driver);
+				send_block(buffer,driver);
 			}
 
-			else // si el formato no es valido, descarto mensaje y libero memoria
+			else
 			{
+				/*Si el formato no es valido, se descarta el mensaje y libera la memoria*/
 				free_block (driver,buffer);
-
 			}
-
-			//ya libero el bloque en la funcion en el timer TX asociado con send_BLock()
-			vTaskDelay( 50 );
 		}
 		gpioToggle(CHECK_LED);
 	}
-
-
 }
 
 
@@ -100,15 +95,20 @@ bool_t driver_init(driver_t* driver)
 
 	SIMPLE_ASSERT((driver->flow.onRxTimeOut));
 
-
-	driver->flow.rxBlock = ( char* ) QMPool_get( &driver->memory.pool,0 ); //pido un bloque del pool
+	/*
+	 * Se pide un bloque del pool
+	 */
+	driver->flow.rxBlock = ( char* ) QMPool_get( &driver->memory.pool,0 );
 	// Creamos la cola para se�alizar la recepcion de un dato valido hacia la aplicacion.
 	driver->onRxQueue = xQueueCreate( POOL_TOTAL_BLOCKS, sizeof( char* ) );
 
 	SIMPLE_ASSERT((driver->onRxQueue));
 
-	//	Creo una cola donde van a ir los bloque que tengo que mandar por UART
-	driver->onTxQueue = xQueueCreate( POOL_TOTAL_BLOCKS, sizeof( char* ) ); //La cola va a tener tantos elementos como bloques de memoria pueda tener el pool
+	/*
+	 * Creo una cola donde van a ir los bloque que tengo que mandar por UART
+	 * La cola va a tener tantos elementos como bloques de memoria pueda tener el pool
+	 */
+	driver->onTxQueue = xQueueCreate( POOL_TOTAL_BLOCKS, sizeof( char* ) );
 
 	SIMPLE_ASSERT((driver->onTxQueue));
 
@@ -134,7 +134,7 @@ bool_t driver_init(driver_t* driver)
 	//Activo interrupciones
 
 	rxInterruptEnable( driver);
-	//txInterruptEnable(driver);
+
 	// Habilitamos todas las interrupciones de la UART seleccionada.
 	uartInterrupt( driver->uart, TRUE );
 	printf("finalizo configuracion\n");
@@ -142,35 +142,32 @@ bool_t driver_init(driver_t* driver)
 
 }
 
+/*
+ * Funcion testigo
+ */
 
-
-
-
-
-
-
-/*Funciones privadas*/
-
-static bool process_block(char* block)
+void led_task(void* params)
 {
-	bool check = false;
 
-	check = check_block(block);
-
-	if(check)
+	while(1)
 	{
-		//solo cambio formato si el contenido del block es valido
-		change_format(block);
+		gpioToggle(LED3);
+		vTaskDelay( 200 );
+
 	}
 
-
-	return check;
 }
 
 
 
 
-static void send_Block(char* block,driver_t* driver)
+
+
+/*================================Funciones privadas================================*/
+
+
+
+static void send_block(char* block,driver_t* driver)
 {
 	xQueueSend( driver->onTxQueue, &block, portMAX_DELAY ); //Envio a la cola de transmision el blocke a transmitir
 	taskENTER_CRITICAL();  //no permito que se modifique txcounter
@@ -184,14 +181,4 @@ static void send_Block(char* block,driver_t* driver)
 }
 
 
-void led_task(void* params)
-{
 
-	while(1)
-	{
-		gpioToggle(LED3);
-		vTaskDelay( 200 );
-
-	}
-
-}
