@@ -24,64 +24,19 @@ static void set_camel(char *block, uint8_t pos_init, uint8_t pos_end);
 
 static void set_snake(char *block, uint8_t pos_init, uint8_t pos_end);
 
-static void set_format(char format, char *block);
-
-static char mayus_to_min(char mayus);
-static char min_to_mayus(char min);
-
-static char mayus_to_min(char mayus)
-{
-
-	char min;
-
-	if (isupper(mayus))
-	{
-		min = mayus - 'A' + 'a';
-	}
-	else
-	{
-		return mayus;
-	}
-
-	return min;
-}
-
-static char min_to_mayus(char min)
-{
-
-	char mayus;
-
-	if (islower(min))
-	{
-		mayus = min - 'a' + 'A';
-	}
-	else
-	{
-		return min;
-	}
-
-	return mayus;
-}
 
 void change_format(char *block)
 {
 
-	// el byte que indica el formato que debe tener la salida
-	char C = block[4];
+	
+	char format = block[FORMAT_DESIGNATOR_POSITION];	// el byte que indica el formato que debe tener la salida
+
+	uint8_t pos_init = START_DATA_POSITION;		//Posicion inicial del mensaje a cambiarle el formato
+
+	uint8_t pos_end = strlen(block) - CRC_SIZE;		//Posicion final del mensaje a cambiarle el formato
+
 
 	set_format(C, block);
-	//
-}
-
-static void set_format(char format, char *block)
-{
-
-	//el string que necesitamos modificar empieza en pos=5
-	uint8_t pos_init = 5;
-
-	//el mensaje termina dos bytes antes del valor de len
-
-	uint8_t pos_end = strlen(block) - 2;
 
 	switch (format)
 	{
@@ -100,6 +55,8 @@ static void set_format(char format, char *block)
 		//formato invalido de C
 		break;
 	}
+
+	//
 }
 
 /*Funciones privadas*/
