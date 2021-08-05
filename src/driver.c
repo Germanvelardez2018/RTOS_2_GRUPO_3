@@ -49,15 +49,13 @@ static void send_block(char* block,driver_t* driver);
 		bool check_ok = false;
 		if(buffer !=NULL) //No DEBERIA RECIBIR NULL,pero conviene validar
 		{
-			/*checkeo formato, secuencia y CRC*/
+			/* Se controla formato, secuencia y CRC*/
 			check_ok = check_block(buffer);
 
 			if(check_ok)
 			{
-				/*
-				 * Se envia el bloque a transmision
-				 * Solo se cambia formato si el contenido del block es valido. Se libera bloque en la funcion
-				 */
+				/* Se envia el bloque a transmision
+				 * Solo se cambia formato si el contenido del block es valido. Se libera bloque en la funcion*/
 				change_format(buffer);
 
 				send_block(buffer,driver);
@@ -81,12 +79,10 @@ bool_t driver_init(driver_t* driver)
 {
 	bool_t res=true;
 
-	/*Iniciamos el hardware del puerto UART con el baudrate seleccionado*/
-
+	/*Se inicializa el hardware del puerto UART con el baudrate seleccionado*/
 	uartConfig(driver->uart,driver->baudrate);
 
-	/*Creamos los timers que haran las funciones de time out de la transmicion y recepcion*/
-
+	/*Se crean los timers que haran las funciones de time out de la transmicion y recepcion*/
 	driver->flow.onTxTimeOut = xTimerCreate( "TX Time Out", PROTOCOL_TIMEOUT,pdFALSE, ( void* ) driver,( void* ) onTxTimeOutCallback );
 
 	SIMPLE_ASSERT((driver->flow.onTxTimeOut));
@@ -95,32 +91,27 @@ bool_t driver_init(driver_t* driver)
 
 	SIMPLE_ASSERT((driver->flow.onRxTimeOut));
 
-	/*
-	 * Se pide un bloque del pool
-	 */
+	/* Se pide un bloque del pool*/
 	driver->flow.rxBlock = ( char* ) QMPool_get( &driver->memory.pool,0 );
-	// Creamos la cola para seï¿½alizar la recepcion de un dato valido hacia la aplicacion.
+
+	/* Se crea la cola para señalizar la recepcion de un dato valido hacia la aplicacion.*/
 	driver->onRxQueue = xQueueCreate( POOL_TOTAL_BLOCKS, sizeof( char* ) );
 
 	SIMPLE_ASSERT((driver->onRxQueue));
 
-	/*
-	 * Creo una cola donde van a ir los bloque que tengo que mandar por UART
-	 * La cola va a tener tantos elementos como bloques de memoria pueda tener el pool
-	 */
+	/* Se crea una cola donde van a ir los bloque que se tienen que mandar por UART
+	 * La cola va a tener tantos elementos como bloques de memoria pueda tener el pool*/
 	driver->onTxQueue = xQueueCreate( POOL_TOTAL_BLOCKS, sizeof( char* ) );
 
 	SIMPLE_ASSERT((driver->onTxQueue));
 
-
-	/*Reservo memoria para el memory pool*/
+	/* Se reserva memoria para el memory pool*/
 	driver->memory.p_memory_pool= ( char* ) pvPortMalloc( POOL_SIZE * sizeof( char ) );
 
 	SIMPLE_ASSERT((driver->memory.p_memory_pool));
 
 
-	/*Inicio el pool de memoria*/
-
+	/* Se inicializa el pool de memoria*/
 	QMPool_init(&(driver->memory.pool),(void*)driver->memory.p_memory_pool,POOL_SIZE* sizeof(char),BLOCK_SIZE);
 
 	driver-> flow.rxLen=0;
@@ -128,14 +119,13 @@ bool_t driver_init(driver_t* driver)
 	driver->flow.tx_counter=0;
 
 
-	/*Pido el primer bloque de memoria*/
+	/* Se pide el primer bloque de memoria*/
 	driver->flow.rxBlock = (char*) QMPool_get(&(driver->memory.pool),0);
 
-	//Activo interrupciones
-
+	/*Se activan las interrupciones*/
 	rxInterruptEnable( driver);
 
-	// Habilitamos todas las interrupciones de la UART seleccionada.
+	/* Se habilitan todas las interrupciones de la UART seleccionada*/
 	uartInterrupt( driver->uart, TRUE );
 	printf("finalizo configuracion\n");
 	return res;
