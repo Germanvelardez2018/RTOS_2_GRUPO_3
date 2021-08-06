@@ -17,10 +17,11 @@
 /*===============================Declaracion de definiciones=======================*/
 
 #define SEC_END_POS 	3
-#define CMD_POS 		4
+#define OPCODE_POS 		4
 #define DATA_START_POS 	5
 #define SEC_LENGTH 		4
 #define CRC_LENGTH		2
+#define OPCODE_LENGTH	1
 #define MAX_LETTERS		10
 #define MAX_WORDS		15
 
@@ -32,31 +33,38 @@ static bool check_CRC(char* block);
 
 static bool check_msg(char* block);
 
+static bool check_opcode(char* block);
+
 /*================================Funciones publicas==============================*/
 
-bool check_block(char* block)
+int check_block(char* block)
 {
-	// checkear secuencia
 
-	if(	!check_secuence( block))
+
+	if(	!check_secuence(block))
 	{
-		return false;
+		return ERROR_SECUENCE;
 	}
 
-	//checkear formato de mensaje valido
+
 
 	if(!check_CRC(block))
 	{
-		return false;
+		return ERROR_CRC;
 	}
 
-	//checkear CRC
-   if(check_msg( block))
+
+   if(!check_msg( block))
     {
-	   return false;
+	   return ERROR_INVALID_DATA;
 	}
 
- return	true;
+   if(!check_opcode(block))
+   {
+	   return ERROR_INVALID_OPCODE;
+   }
+
+ return	BLOCK_OK;
 }
 
 
@@ -114,52 +122,73 @@ static bool check_CRC(char* block)
 
 static bool check_msg(char* block)
 {
-	bool res = TRUE;
 	uint8_t words = 0;
 	uint8_t letters = 0;
 	uint8_t length = strlen(block);
 	uint8_t i;
-	if(length <= (SEC_LENGTH + CRC_LENGTH) )
+
+
+	if(length <= (SEC_LENGTH + OPCODE_LENGTH + CRC_LENGTH))
 	{
-		res = FALSE;
-	}else
-	{
-		for (i=(SEC_END_POS + 1); i < (length - CRC_LENGTH); i++)
-		{
-			if (islower(block[i]))
-			{
-				letters++;
-			}else if (isupper(block[i]))
-			{
-				if (letters == 0)
-				{
-					letters++;
-				}else
-				{
-					words++;
-				}
-			}else if(block[i] == '_' || block[i] == ' ')
-			{
-				if(letters > 0 && letters <= MAX_WORDS)
-				{
-					words++;
-					letters = 0;
-					if (words > MAX_WORDS)
-					{
-						res = FALSE;
-						break;
-					}
-				}
-			}else
-			{
-				res = FALSE;
-				break;
-			}
-		}
+		return FALSE;
 	}
 
 
-    return res;
+	for (i=(OPCODE_POS + 1); i < (length - CRC_LENGTH); i++)
+	{
+		if (islower(block[i]))
+		{
+			letters++;
+		}else if (isupper(block[i]))
+		{
+			if (letters == 0)
+			{
+				letters++;
+			}else
+			{
+				words++;
+			}
+		}else if(block[i] == '_' || block[i] == ' ')
+		{
+			if(letters > 0 && letters <= MAX_LETTERS)
+			{
+				words++;
+				letters = 0;
+				if (words > MAX_WORDS)
+				{
+					return FALSE;
+				}
+			}else
+			{
+				return FALSE;
+			}
+		}else
+		{
+			return FALSE;
+		}
+	}
+	if (letters == 0)
+	{
+		return FALSE;
+	}
+    return TRUE;
 
+}
+
+static bool check_opcode(char* block)
+{
+	if(block[OPCODE_POS] == 'S')
+	{
+		return TRUE;
+	}
+	if(block[OPCODE_POS] == 'C')
+	{
+		return TRUE;
+	}
+	if(block[OPCODE_POS] == 'P')
+	{
+		return TRUE;
+	}
+	return FALSE;
 }
 

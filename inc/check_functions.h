@@ -24,9 +24,12 @@
 
 /*==================================Declaracion Defines============================*/
 
+#define BLOCK_OK				-1
 #define ERROR_INVALID_DATA 		0
 #define ERROR_INVALID_OPCODE	1
 #define ERROR_SYSTEM			2
+#define ERROR_CRC				3
+#define ERROR_SECUENCE			4
 
 
 #define FORMAT_CC		'C'
@@ -37,7 +40,7 @@
 
 /*Block es todo el bloque, secuencias! C ! mensaje ! CRC*/
 
-bool check_block(char* block);
+int check_block(char* block);
 
 
 
