@@ -37,7 +37,7 @@ static bool check_opcode(char* block);
 
 /*================================Funciones publicas==============================*/
 
-int check_block(char* block)
+errorCodes_t check_block(char* block)
 {
 
 

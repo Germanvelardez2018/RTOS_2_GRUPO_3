@@ -24,23 +24,28 @@
 
 /*==================================Declaracion Defines============================*/
 
-#define BLOCK_OK				-1
-#define ERROR_INVALID_DATA 		0
-#define ERROR_INVALID_OPCODE	1
-#define ERROR_SYSTEM			2
-#define ERROR_CRC				3
-#define ERROR_SECUENCE			4
+
 
 
 #define FORMAT_CC		'C'
 #define	FORMAT_P		'P'
 #define FORMAT_S		'S'
 
+typedef enum
+{
+	ERROR_INVALID_DATA,
+	ERROR_INVALID_OPCODE,
+	ERROR_SYSTEM,
+	ERROR_CRC,
+	ERROR_SECUENCE,
+	BLOCK_OK
+}errorCodes_t;
+
 /*================================Funciones publicas==============================*/
 
 /*Block es todo el bloque, secuencias! C ! mensaje ! CRC*/
 
-int check_block(char* block);
+errorCodes_t check_block(char* block);
 
 
 
