@@ -20,7 +20,7 @@
  * */
 
 #include "driver.h"
-
+#include "error.h"
 
 /*==================================Declaracion Defines============================*/
 
@@ -31,15 +31,7 @@
 #define	FORMAT_P		'P'
 #define FORMAT_S		'S'
 
-typedef enum
-{
-	ERROR_INVALID_DATA,
-	ERROR_INVALID_OPCODE,
-	ERROR_SYSTEM,
-	ERROR_CRC,
-	ERROR_SECUENCE,
-	BLOCK_OK
-}errorCodes_t;
+
 
 /*================================Funciones publicas==============================*/
 

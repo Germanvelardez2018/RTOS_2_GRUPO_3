@@ -12,6 +12,7 @@
 
 #include "check_functions.h"
 #include "msg_format.h"
+#include "error.h"
 
 /*==================================Declaracion Defines============================*/
 
@@ -30,6 +31,13 @@
  * Una vez transmitido, liberar.
  * */
 
+
+static void  insert_error_msg(char* b, int8_t x);
+
+static void add_crc_at_block(char* block);
+
+
+
 static void send_block(char* block,driver_t* driver);
 
 
@@ -47,26 +55,30 @@ static void send_block(char* block,driver_t* driver);
 		/* Se recibiran los bloques de datos mediante queue onRxQueue (se considera capa 2 o 3)
 		 * Se espera a que venga un bloque por la cola*/
 		xQueueReceive( driver->onRxQueue,&buffer,portMAX_DELAY );
-		bool checkOk = false;
+		errorCodes_t checkOk = BLOCK_OK;
+
+
 		if(buffer !=NULL) //No DEBERIA RECIBIR NULL,pero conviene validar
 		{
 			/* Se controla formato, secuencia y CRC*/
 			checkOk = check_block(buffer);
 
-			if(checkOk)
+			printf("el check es: %d\n",checkOk);
+			//if(checkOk)
+			if(checkOk != BLOCK_OK)
 			{
 				/* Se envia el bloque a transmision
 				 * Solo se cambia formato si el contenido del block es valido. Se libera bloque en la funcion*/
 				change_format(buffer);
-
-				send_block(buffer,driver);
 			}
-
-			else
+			else    //ERROR EN EL MENSAJE
 			{
-				/*Si el formato no es valido, se descarta el mensaje y libera la memoria*/
-				free_block (driver,buffer);
+				//inserto el mensaje de error correspondiente
+				insert_error_msg(buffer,checkOk);
 			}
+
+			//La funcion send_block siempre se llama
+			  send_block(buffer,driver);
 		}
 		gpioToggle(CHECK_LED);
 	}
@@ -95,7 +107,7 @@ bool_t driver_init(driver_t* driver)
 	/* Se pide un bloque del pool*/
 	driver->flow.rxBlock = ( char* ) QMPool_get( &driver->memory.pool,0 );
 
-	/* Se crea la cola para señalizar la recepcion de un dato valido hacia la aplicacion.*/
+	/* Se crea la cola para seï¿½alizar la recepcion de un dato valido hacia la aplicacion.*/
 	driver->onRxQueue = xQueueCreate( POOL_TOTAL_BLOCKS, sizeof( char* ) );
 
 	SIMPLE_ASSERT((driver->onRxQueue));
@@ -158,8 +170,43 @@ void led_task(void* params)
 
 
 
+
+
+static void  insert_error_msg(char* b, int8_t x)
+{
+
+
+	b[OFFSET_MSG]='E';
+	b[OFFSET_MSG]=_INT_TO_CHAR( x);
+	b[OFFSET_MSG+2]='\0';
+
+}
+
+static void add_crc_at_block(char* block)
+{
+	printf("agregando crc:");
+	int8_t len = strlen(block);
+
+	int8_t crc = crc8_calc(0,block,len);
+	printf("%d\n",crc);
+	char CRC[2] ;
+	int_to_ASCII(crc ,CRC);
+
+	printf("en char: %c ----%c\n",CRC[0],CRC[1] );
+
+	//agrego el crc
+
+	block[len + CRC_SIZE]=CRC[0];
+	block[len + CRC_SIZE +1]=CRC[1];
+	block[len + CRC_SIZE +2]= '\0';
+}
+
 static void send_block(char* block,driver_t* driver)
 {
+	/*Antes de enviar el mensaje calcular CRC y agregarlo*/
+	add_crc_at_block(block);
+
+
 	/* Se envia a la cola de transmision el block a transmitir*/
 	xQueueSend( driver->onTxQueue, &block, portMAX_DELAY );
 	/* No se permite que se modifique txcounter*/

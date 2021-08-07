@@ -39,12 +39,17 @@ void change_format(char *block)
 	{
 
 	case FPASCAL:
+		printf("pascal:\n");
 		set_pascal(block, pos_init, pos_end);
 		break;
 	case FCAMEL:
+		printf("Camel:\n");
+
 		set_camel(block, pos_init, pos_end);
 		break;
 	case FSNAKE:
+		printf("snake:\n");
+
 		set_snake(block, pos_init, pos_end);
 		break;
 
