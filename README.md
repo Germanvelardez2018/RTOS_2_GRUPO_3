@@ -51,8 +51,7 @@ Se agrego lo siguiente:
  <li>Funciones de comprobacion de CRC8,formato y secuencia valida.</li>
  <li>Se agrego modulo de capa 3 (m_c3.h, m_c3.c) donde se gestionan las tareas de esta capas.</li>
  
-
-
+</ul>
 
 
 ### Tercera semana:
@@ -60,13 +59,25 @@ Se modifico lo siguiente:
 <ul>
  <li> Se desarrollo driver.c para reemplazar a protocol.c</li>
  <li> m_c3.c ya no se utiliza</li>
-
  <li>Se modificaron las implementaciones tanto de ISR como de iniciación del modulo protocol.</li>
  <li>Se agregaron los archivos msg_format(.h,.c) donde se implementan las funciones para cambiar de formato los string de texto</li>
  <li>Se agrego diagrama de sistema </li>
  <li>Se implementa timmers tanto para recepccion como para transmisión </li>
  <li>Se completo las funciones para checkeo de formato valido del mensaje, secuencia y crc</li>
  <li>Se implemento la transmisión de mensaje mediante interrupcion </li>
+
+
+</ul>
+    
+    
+### Cuarta semana:
+Se modifico lo siguiente:
+<ul>
+ <li> Se agrego el archivo error_msg.c</li>
+ <li> Se implemento agregar mensaje de error al final de block con formato invalido</li>
+ <li> Se implemento funcion para comprobar numero de palabras maximo y minimo en mensaje validos</li>
+ <li> Se soluciono problemas con las funciones de cambio de formato de mensajes</li>
+   
 
 
 </ul>
