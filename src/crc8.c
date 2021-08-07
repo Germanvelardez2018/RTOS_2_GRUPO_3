@@ -10,9 +10,9 @@
 
 /*============================Declaracion Defines============================*/
 
-#define ASCII_A_POS 		41
-#define ASCCI_NUM_TO_INT 	30
-#define ASCII_LETTER_TO_INT 31
+#define ASCII_A_POS 		65
+#define ASCCI_NUM_TO_INT 	48
+#define ASCII_LETTER_TO_INT 55
 #define BASE_DECIMAL 		10
 #define BASE_HEX 			16
 
@@ -23,23 +23,6 @@ uint8_t char_to_int(char hex);
 char int_to_char(int numero);
 
 
-
-/*
- *
- * ANCII-------------------->DECIMAL
- * 	A = 10		     		   41
- *  B						   42
- *  C						   43
- *  D						   44
- *  E                          45
- *  F = 15                     46
- *si char es menor que 40 entonces es un numero de 0 a 9
- *--------------si -------------------------
- *  0						   30
- *  1						   31
- *  2                          32
- *  9						   39
- * */
 
 
 
@@ -69,8 +52,8 @@ uint8_t char_to_int(char hex)
 
 void  int_to_ASCII(uint8_t intCRC,char* stringCRC)
 {
-	stringCRC[1] = int_to_char(intCRC / 16);
-	stringCRC[0] = int_to_char(intCRC % 16);
+	stringCRC[0] = int_to_char(intCRC / 16);
+	stringCRC[1] = int_to_char(intCRC % 16);
 }
 
 char int_to_char(int numero)
