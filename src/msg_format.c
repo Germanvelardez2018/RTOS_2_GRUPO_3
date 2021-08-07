@@ -67,6 +67,7 @@ void change_format(char *block)
  *
  *
  * */
+
 static void set_pascal(char *block, uint8_t pos_init, uint8_t pos_end)
 {
 	uint8_t pos_read = pos_init;		//Posicion de lectura
@@ -79,14 +80,19 @@ static void set_pascal(char *block, uint8_t pos_init, uint8_t pos_end)
 			pos_read++;
 			block[pos_write] = toupper(block[pos_read]);
 		}
-		else if (pos_read == 1)
+		else if (pos_read == pos_init)
 		{
 			block[pos_write] = toupper(block[pos_read]);
+			}
+		else{
+			block[pos_write] = block[pos_read];
 		}
 		pos_write++;
 	}
 	block[pos_write] = '\0'; //Se cierra el nuevo string
 }
+
+
 
 static void set_camel(char *block, uint8_t pos_init, uint8_t pos_end)
 {
@@ -100,9 +106,12 @@ static void set_camel(char *block, uint8_t pos_init, uint8_t pos_end)
 			pos_read++;
 			block[pos_write] = toupper(block[pos_read]);
 		}
-		else if (pos_read == 1)
+		else if (pos_read == pos_init)
 		{
 			block[pos_write] = tolower(block[pos_read]);
+		}
+		else{
+			block[pos_write] = block[pos_read];
 		}
 		pos_write++;
 	}
@@ -111,7 +120,7 @@ static void set_camel(char *block, uint8_t pos_init, uint8_t pos_end)
 
 static void set_snake(char *block, uint8_t pos_init, uint8_t pos_end)
 {
-	char	aux_block[sizeof(block)/sizeof(char)];
+	char	aux_block[FRAME_MAX_SIZE];
 	uint8_t pos_read = pos_init;		//Posicion de lectura
 	uint8_t pos_write = pos_init;			//Posicion de escritura
 
@@ -123,12 +132,13 @@ static void set_snake(char *block, uint8_t pos_init, uint8_t pos_end)
 		{
 			block[pos_write] = '_';
 		}
-		else if (isupper(aux_block[pos_read]))
+		else if (isupper(aux_block[pos_read]) && (pos_read != pos_init))
 		{
 			block[pos_write] = '_';
 			pos_write++;
 			block[pos_write] = tolower(aux_block[pos_read]);
-		}else {
+		}
+		else {
 			block[pos_write] = tolower(aux_block[pos_read]);
 		}
 		pos_write++;
