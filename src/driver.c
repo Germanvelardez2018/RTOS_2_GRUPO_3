@@ -9,10 +9,11 @@
 
 #include "driver.h"
 #include "uartIRQ.h"
-
+#include "crc8.h"
 #include "check_functions.h"
 #include "msg_format.h"
-#include "error.h"
+#include "error_msg.h"
+#include <string.h>
 
 /*==================================Declaracion Defines============================*/
 
@@ -56,20 +57,20 @@ static void send_block(char* block,driver_t* driver);
 		 * Se espera a que venga un bloque por la cola*/
 		xQueueReceive( driver->onRxQueue,&buffer,portMAX_DELAY );
 		errorCodes_t checkOk = BLOCK_OK;
-
+		printf("despues de checks:%s\n",buffer);
 
 		if(buffer !=NULL) //No DEBERIA RECIBIR NULL,pero conviene validar
 		{
 			/* Se controla formato, secuencia y CRC*/
 			checkOk = check_block(buffer);
 
-			printf("el check es: %d\n",checkOk);
-			//if(checkOk)
-			if(checkOk != BLOCK_OK)
+
+			if(checkOk == BLOCK_OK)
 			{
 				/* Se envia el bloque a transmision
 				 * Solo se cambia formato si el contenido del block es valido. Se libera bloque en la funcion*/
 				change_format(buffer);
+				printf("despues de FORMAT:%s\n",buffer);
 			}
 			else    //ERROR EN EL MENSAJE
 			{
@@ -90,6 +91,7 @@ static void send_block(char* block,driver_t* driver);
 
 bool_t driver_init(driver_t* driver)
 {
+	printf("inicio driver \n ");
 	bool_t res=true;
 
 	/*Se inicializa el hardware del puerto UART con el baudrate seleccionado*/
@@ -140,7 +142,7 @@ bool_t driver_init(driver_t* driver)
 
 	/* Se habilitan todas las interrupciones de la UART seleccionada*/
 	uartInterrupt( driver->uart, TRUE );
-	printf("finalizo configuracion\n");
+
 	return res;
 
 }
@@ -177,36 +179,29 @@ static void  insert_error_msg(char* b, int8_t x)
 
 
 	b[OFFSET_MSG]='E';
-	b[OFFSET_MSG]=_INT_TO_CHAR( x);
+	b[OFFSET_MSG+1]=_INT_TO_CHAR( x);
 	b[OFFSET_MSG+2]='\0';
 
 }
 
 static void add_crc_at_block(char* block)
 {
-	printf("agregando crc:");
 	int8_t len = strlen(block);
 
 	int8_t crc = crc8_calc(0,block,len);
-	printf("%d\n",crc);
-	char CRC[2] ;
+	char CRC[2];
 	int_to_ASCII(crc ,CRC);
-
-	printf("en char: %c ----%c\n",CRC[0],CRC[1] );
-
 	//agrego el crc
 
-	block[len + CRC_SIZE]=CRC[0];
-	block[len + CRC_SIZE +1]=CRC[1];
-	block[len + CRC_SIZE +2]= '\0';
+	block[len ]=CRC[0];
+	block[len +1]=CRC[1];
+	block[len +2]= '\0';
 }
 
 static void send_block(char* block,driver_t* driver)
 {
 	/*Antes de enviar el mensaje calcular CRC y agregarlo*/
 	add_crc_at_block(block);
-
-
 	/* Se envia a la cola de transmision el block a transmitir*/
 	xQueueSend( driver->onTxQueue, &block, portMAX_DELAY );
 	/* No se permite que se modifique txcounter*/

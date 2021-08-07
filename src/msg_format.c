@@ -45,6 +45,8 @@ void change_format(char *block)
 		set_camel(block, pos_init, pos_end);
 		break;
 	case FSNAKE:
+
+
 		set_snake(block, pos_init, pos_end);
 		break;
 

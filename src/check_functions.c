@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "check_functions.h"
 #include "sapi.h"
+#include "error_msg.h"
 
 #include "crc8.h"
 
@@ -43,14 +44,14 @@ errorCodes_t check_block(char* block)
 
 	if(	!check_secuence(block))
 	{
-		return ERROR_SECUENCE;
+		return ERROR_INVALID_DATA;//ERROR_SECUENCE;
 	}
 
 
 
 	if(!check_CRC(block))
 	{
-		return ERROR_CRC;
+		return ERROR_INVALID_DATA ;//ERROR_CRC
 	}
 
 
