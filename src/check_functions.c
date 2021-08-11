@@ -72,14 +72,15 @@ errorCodes_t check_block(char* block)
 /*================================Funciones privadas================================*/
 
 /*Secuencia debe ser numero*/
-static bool check_secuence(char* block)
+static bool check_secuence(char* block)   //verificada. Funciona
 {
 	bool res = true;  // por defecto
 
 	char secuence[SEC_LENGTH + 1];
 
 	strncpy(secuence,block,SEC_LENGTH);
-	secuence[SEC_END_POS + 1]='\0';
+	secuence[SEC_LENGTH]='\0';
+
 
 	//si secuence no es numero atoi devolvera cero
 	int num = atoi(secuence);
@@ -88,6 +89,7 @@ static bool check_secuence(char* block)
 	{
 		res=false;
 	}
+	printf("check_secuence:%d\n",res);
 
 	return res;
 }
@@ -98,7 +100,7 @@ static bool check_secuence(char* block)
 static bool check_CRC(char* block)
 {
 	bool res = true;
-	int8_t size = strlen(block);
+	int8_t size = strlen(block) -2 ;
 
 	/*
 	 *   secuencia|C| mensaje| crc
@@ -109,14 +111,21 @@ static bool check_CRC(char* block)
 	char CRC[2];
 	CRC[0]=block[size-2];
 	CRC[1] = block [size -1];
+
+	printf("char recibido:%c%c \n",CRC[0],CRC[1]);
 	int crc_mensaje = 0;
 	crc_mensaje = ASCII_to_int(CRC);
+	printf("2chars recibidos:%c%c transformado a numero=>%d \n",CRC[0],CRC[1],crc_mensaje);
 	//calculo el CRC yo mismo
-	int8_t crc_calculado = crc8_calc(0,block,size);
+	uint8_t crc_calculado = crc8_calc(0,block,size);
+
+	printf("check crc %d[ascci_TO_INT] =  %d[calculado por CIAA]\n",crc_mensaje,crc_calculado);
 	if( crc_mensaje != crc_calculado)
 	{
 		res = false;
 	}
+
+	printf("check_crc:%d\n",res);
 	return res;
 
 }
