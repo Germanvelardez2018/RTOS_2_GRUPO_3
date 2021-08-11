@@ -15,6 +15,11 @@
 #include "error_msg.h"
 #include <string.h>
 
+
+
+
+
+
 /*==================================Declaracion Defines============================*/
 
 #define CHECK_LED 	LED1
@@ -57,7 +62,7 @@ static void send_block(char* block,driver_t* driver);
 		 * Se espera a que venga un bloque por la cola*/
 		xQueueReceive( driver->onRxQueue,&buffer,portMAX_DELAY );
 		errorCodes_t checkOk = BLOCK_OK;
-		printf("despues de checks:%s\n",buffer);
+
 
 		if(buffer !=NULL) //No DEBERIA RECIBIR NULL,pero conviene validar
 		{
@@ -70,7 +75,6 @@ static void send_block(char* block,driver_t* driver);
 				/* Se envia el bloque a transmision
 				 * Solo se cambia formato si el contenido del block es valido. Se libera bloque en la funcion*/
 				change_format(buffer);
-				printf("despues de FORMAT:%s\n",buffer);
 			}
 			else    //ERROR EN EL MENSAJE
 			{
@@ -91,7 +95,7 @@ static void send_block(char* block,driver_t* driver);
 
 bool_t driver_init(driver_t* driver)
 {
-	printf("inicio driver \n ");
+
 	bool_t res=true;
 
 	/*Se inicializa el hardware del puerto UART con el baudrate seleccionado*/

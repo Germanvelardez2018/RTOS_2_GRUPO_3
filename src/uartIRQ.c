@@ -239,6 +239,8 @@ static void _onRxCallback( void *param )
 	  //	Tomo el bloque a transmitir de la cola
 	        xQueueReceiveFromISR( driver->onTxQueue,&( driver->flow.txBlock), &xTaskWokenByReceive );
 	        driver->flow.txLen = strlen(driver->flow.txBlock);
+	        uartTxWrite(driver->uart,'(');
+
 	   }
 	   //	Si no llegué al final de la cadena transmito el dato
 	   if ( driver->flow.tx_counter < driver->flow.txLen )
@@ -253,6 +255,8 @@ static void _onRxCallback( void *param )
 	    //	deshabilitar la interrupción e iniciar el timeout.
 	    if ( (driver->flow.tx_counter) == (driver->flow.txLen) )
 	    {
+	        uartTxWrite(driver->uart,')');
+
 	        uartCallbackClr( driver->uart, UART_TRANSMITER_FREE ); //Deshabilito la interrupcion de TX
 	        xTimerStartFromISR( driver->flow.onTxTimeOut, &xTaskWokenByReceive ); //Inicio el timer de Timeout
 	    }
@@ -325,7 +329,6 @@ static void _add_newbyte_in_block(char new_byte, driver_t* driver)
 	//Se recibio un SOM?
 	 if(driver->flow.state == FLOW_INIT)
 	{
-	//	 printf("add\n");
 	  //Es un caracter valido?
 	  //guardo el caracter nuevo
 	  driver->flow.rxBlock[driver->flow.rxLen] = new_byte;

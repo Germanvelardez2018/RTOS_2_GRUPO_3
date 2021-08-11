@@ -51,14 +51,6 @@ int main(void)
 
 
 
-	xTaskCreate(led_task,					// Funcion de la tarea a ejecutar
-			(const char *) "led", 			// Nombre de la tarea como String amigable para el usuario
-			configMINIMAL_STACK_SIZE * 4,   // Cantidad de stack de la tarea
-			0,                    			// Parametros de tarea
-			tskIDLE_PRIORITY + 1,           // Prioridad de la tarea
-			0);                        		// Puntero a la tarea creada en el sistema
-
-
 
 
 	vTaskStartScheduler();
