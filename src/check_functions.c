@@ -10,7 +10,7 @@
 #include "check_functions.h"
 #include "sapi.h"
 #include "error_msg.h"
-
+#include "msg_format.h"
 #include "crc8.h"
 
 #include <ctype.h>
@@ -89,7 +89,6 @@ static bool check_secuence(char* block)   //verificada. Funciona
 	{
 		res=false;
 	}
-	printf("check_secuence:%d\n",res);
 
 	return res;
 }
@@ -100,7 +99,7 @@ static bool check_secuence(char* block)   //verificada. Funciona
 static bool check_CRC(char* block)
 {
 	bool res = true;
-	int8_t size = strlen(block) -2 ;
+	int8_t size = strlen(block)  ;
 
 	/*
 	 *   secuencia|C| mensaje| crc
@@ -112,20 +111,18 @@ static bool check_CRC(char* block)
 	CRC[0]=block[size-2];
 	CRC[1] = block [size -1];
 
-	printf("char recibido:%c%c \n",CRC[0],CRC[1]);
+
+
 	int crc_mensaje = 0;
 	crc_mensaje = ASCII_to_int(CRC);
-	printf("2chars recibidos:%c%c transformado a numero=>%d \n",CRC[0],CRC[1],crc_mensaje);
 	//calculo el CRC yo mismo
-	uint8_t crc_calculado = crc8_calc(0,block,size);
+	uint8_t crc_calculado = crc8_calc(0,block,size-2);
 
-	printf("check crc %d[ascci_TO_INT] =  %d[calculado por CIAA]\n",crc_mensaje,crc_calculado);
 	if( crc_mensaje != crc_calculado)
 	{
 		res = false;
 	}
 
-	printf("check_crc:%d\n",res);
 	return res;
 
 }
@@ -187,15 +184,15 @@ static bool check_msg(char* block)
 
 static bool check_opcode(char* block)
 {
-	if(block[OPCODE_POS] == 'S')
+	if(block[OPCODE_POS] == FSNAKE)
 	{
 		return TRUE;
 	}
-	if(block[OPCODE_POS] == 'C')
+	if(block[OPCODE_POS] == FCAMEL)
 	{
 		return TRUE;
 	}
-	if(block[OPCODE_POS] == 'P')
+	if(block[OPCODE_POS] == FPASCAL)
 	{
 		return TRUE;
 	}
