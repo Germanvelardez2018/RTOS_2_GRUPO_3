@@ -26,14 +26,13 @@ char int_to_char(int numero);
 
 
 
-
 /*=============================Declaracion Funciones Publicas================*/
 
 
 uint8_t ASCII_to_int(char* stringCRC)
 {
 
-	return ((char_to_int(stringCRC[1])*BASE_DECIMAL) + char_to_int(stringCRC[0])) ;
+	return ((char_to_int(stringCRC[0])*BASE_HEX) + char_to_int(stringCRC[1])) ;
 }
 
 
