@@ -183,8 +183,9 @@ static void  insert_error_msg(char* b, int8_t x)
 
 
 	b[OFFSET_MSG]='E';
-	b[OFFSET_MSG+1]=_INT_TO_CHAR( x);
-	b[OFFSET_MSG+2]='\0';
+	int_to_ASCII(x, (b + OFFSET_MSG + 1));
+	//b[OFFSET_MSG+1]=_INT_TO_CHAR( x);
+	b[OFFSET_MSG+3]='\0';
 
 }
 

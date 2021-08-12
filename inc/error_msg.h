@@ -11,7 +11,7 @@
 
 
 #define _INT_TO_CHAR(x)       (char)((char)x + '0')
-#define OFFSET_MSG		    	5
+#define OFFSET_MSG		    	4
 
 
 
@@ -19,8 +19,8 @@
 
 typedef enum
 {
-	ERROR_INVALID_DATA,
 	ERROR_INVALID_OPCODE,
+	ERROR_INVALID_DATA,
 	ERROR_SYSTEM,
 	ERROR_CRC,
 	ERROR_SECUENCE,
