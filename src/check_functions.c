@@ -87,7 +87,16 @@ static bool check_secuence(char* block)   //verificada. Funciona
 
 	if(num == 0) //significa que atoi fallo o la secuencia es 0000?
 	{
-		res=false;
+		// verificar secuencia valida 0000
+
+			for(int i=0 ; i < SEC_LENGTH ;i++)
+		{
+			if(secuence[i] !='0')
+			{
+				return false;
+			}
+		}
+
 	}
 
 	return res;
