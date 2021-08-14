@@ -18,22 +18,20 @@
 
 static char detect_format(char *block, uint8_t pos_init, uint8_t pos_end);
 
-static void set_pascal(char *block, uint8_t pos_init, uint8_t pos_end);
+static void set_pascal(char *block);
 
-static void set_camel(char *block, uint8_t pos_init, uint8_t pos_end);
+static void set_camel(char *block);
 
-static void set_snake(char *block, uint8_t pos_init, uint8_t pos_end);
-
+static void set_snake(char *block);
 
 void change_format(char *block)
 {
 
-	
-	char format = block[FORMAT_DESIGNATOR_POSITION];	// el byte que indica el formato que debe tener la salida
+	char format = block[FORMAT_DESIGNATOR_POSITION]; // el byte que indica el formato que debe tener la salida
 
-	uint8_t pos_init = START_DATA_POSITION;		//Posicion inicial del mensaje a cambiarle el formato
+	uint8_t pos_init = START_DATA_POSITION; //Posicion inicial del mensaje a cambiarle el formato
 
-	uint8_t pos_end = strlen(block) - CRC_SIZE;		//Posicion final del mensaje a cambiarle el formato
+	uint8_t pos_end = strlen(block) - CRC_SIZE; //Posicion final del mensaje a cambiarle el formato
 
 	switch (format)
 	{
@@ -45,8 +43,6 @@ void change_format(char *block)
 		set_camel(block, pos_init, pos_end);
 		break;
 	case FSNAKE:
-
-
 		set_snake(block, pos_init, pos_end);
 		break;
 
@@ -65,10 +61,11 @@ void change_format(char *block)
  *
  * */
 
-static void set_pascal(char *block, uint8_t pos_init, uint8_t pos_end)
+static void set_pascal(char *block)
 {
-	uint8_t pos_read = pos_init;		//Posicion de lectura
-	uint8_t pos_write = pos_init;			//Posicion de escritura
+	uint8_t pos_end = strlen(block) - CRC_SIZE; //Posicion final del mensaje a cambiarle el formato
+	uint8_t pos_read = START_DATA_POSITION;;  //Posicion de lectura
+	uint8_t pos_write = START_DATA_POSITION;; //Posicion de escritura
 
 	for (; pos_read < pos_end; pos_read++)
 	{
@@ -80,8 +77,9 @@ static void set_pascal(char *block, uint8_t pos_init, uint8_t pos_end)
 		else if (pos_read == pos_init)
 		{
 			block[pos_write] = toupper(block[pos_read]);
-			}
-		else{
+		}
+		else
+		{
 			block[pos_write] = block[pos_read];
 		}
 		pos_write++;
@@ -89,12 +87,11 @@ static void set_pascal(char *block, uint8_t pos_init, uint8_t pos_end)
 	block[pos_write] = '\0'; //Se cierra el nuevo string
 }
 
-
-
-static void set_camel(char *block, uint8_t pos_init, uint8_t pos_end)
+static void set_camel(char *block)
 {
-	uint8_t pos_read = pos_init;		//Posicion de lectura
-	uint8_t pos_write = pos_init;			//Posicion de escritura
+	uint8_t pos_end = strlen(block) - CRC_SIZE; //Posicion final del mensaje a cambiarle el formato
+	uint8_t pos_read = START_DATA_POSITION;;  //Posicion de lectura
+	uint8_t pos_write = START_DATA_POSITION;; //Posicion de escritura
 
 	for (; pos_read < pos_end; pos_read++)
 	{
@@ -107,7 +104,8 @@ static void set_camel(char *block, uint8_t pos_init, uint8_t pos_end)
 		{
 			block[pos_write] = tolower(block[pos_read]);
 		}
-		else{
+		else
+		{
 			block[pos_write] = block[pos_read];
 		}
 		pos_write++;
@@ -115,13 +113,14 @@ static void set_camel(char *block, uint8_t pos_init, uint8_t pos_end)
 	block[pos_write] = '\0'; //Se cierra el nuevo string
 }
 
-static void set_snake(char *block, uint8_t pos_init, uint8_t pos_end)
+static void set_snake(char *block)
 {
-	char	aux_block[FRAME_MAX_SIZE];
-	uint8_t pos_read = pos_init;		//Posicion de lectura
-	uint8_t pos_write = pos_init;			//Posicion de escritura
+	char aux_block[FRAME_MAX_SIZE];
+	uint8_t pos_end = strlen(block) - CRC_SIZE; //Posicion final del mensaje a cambiarle el formato
+	uint8_t pos_read = START_DATA_POSITION;;  //Posicion de lectura
+	uint8_t pos_write = START_DATA_POSITION;; //Posicion de escritura
 
-	strcpy (aux_block,block);		//Se deja una copia del string original para poder realizar la operacion
+	strcpy(aux_block, block); //Se deja una copia del string original para poder realizar la operacion
 
 	for (; pos_read < pos_end; pos_read++)
 	{
@@ -135,13 +134,13 @@ static void set_snake(char *block, uint8_t pos_init, uint8_t pos_end)
 			pos_write++;
 			block[pos_write] = tolower(aux_block[pos_read]);
 		}
-		else {
+		else
+		{
 			block[pos_write] = tolower(aux_block[pos_read]);
 		}
 		pos_write++;
 	}
 	block[pos_write] = '\0'; //Se cierra el nuevo string
-
 }
 /* si todos los caracteres del mensaje son minusculas o '_', entonces el mensaje es snake_case
  * si el primer caracter del mensaje es Mayuscula, entonces es PascalCase
