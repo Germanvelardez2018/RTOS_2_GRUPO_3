@@ -32,6 +32,12 @@
 
 void change_format(char* block);
 
+void set_pascal(char *block);
+
+void set_camel(char *block);
+
+void set_snake(char *block);
+
 
 
 

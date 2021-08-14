@@ -18,11 +18,7 @@
 
 static char detect_format(char *block, uint8_t pos_init, uint8_t pos_end);
 
-static void set_pascal(char *block);
 
-static void set_camel(char *block);
-
-static void set_snake(char *block);
 
 void change_format(char *block)
 {
@@ -61,7 +57,7 @@ void change_format(char *block)
  *
  * */
 
-static void set_pascal(char *block)
+ void set_pascal(char *block)
 {
 	uint8_t pos_end = strlen(block) - CRC_SIZE; //Posicion final del mensaje a cambiarle el formato
 	uint8_t pos_read = START_DATA_POSITION;  //Posicion de lectura
@@ -87,7 +83,7 @@ static void set_pascal(char *block)
 	block[pos_write] = '\0'; //Se cierra el nuevo string
 }
 
-static void set_camel(char *block)
+ void set_camel(char *block)
 {
 	uint8_t pos_end = strlen(block) - CRC_SIZE; //Posicion final del mensaje a cambiarle el formato
 	uint8_t pos_read = START_DATA_POSITION;  //Posicion de lectura
@@ -113,7 +109,7 @@ static void set_camel(char *block)
 	block[pos_write] = '\0'; //Se cierra el nuevo string
 }
 
-static void set_snake(char *block)
+ void set_snake(char *block)
 {
 	char aux_block[FRAME_MAX_SIZE];
 	uint8_t pos_end = strlen(block) - CRC_SIZE; //Posicion final del mensaje a cambiarle el formato

@@ -49,13 +49,47 @@ static void send_block(char* block,driver_t* driver);
 
 /*================================Funciones publicas==============================*/
 
+#define AO_SIZE			4
+#define N_ELEMENTS		4
 
-
+typedef enum
+{
+	AO_SNAKE,
+	AO_CAMEL,
+	AO_PASCAL,
+	AO_ERROR
+}OBJECT_INDEX;
 
  void driver_task(void* params)
 {
-	char* buffer;
+	char* block;
 	driver_t* driver = (driver_t*) params;
+
+	ao_base_t ao_snake = {.state = AO_OFF};
+	ao_base_t ao_camel = {.state = AO_OFF};
+
+	ao_base_t ao_pascal = {.state = AO_OFF};
+
+	ao_base_t ao_error = {.state = AO_OFF};
+
+
+
+	ao_base_t*  active_objects[AO_SIZE]={
+				&ao_snake,
+				&ao_camel,
+				&ao_pascal,
+				&ao_error
+	};
+
+	callback_ao_t  callbacks[AO_SIZE]={
+			set_snake,
+			set_camel,
+			set_pascal,
+			NULL
+
+	};
+
+	uint8_t index = 0;
 
 	while(1)
 	{
@@ -63,11 +97,53 @@ static void send_block(char* block,driver_t* driver);
 
 		/* Se recibiran los bloques de datos mediante queue onRxQueue (se considera capa 2 o 3)
 		 * Se espera a que venga un bloque por la cola*/
-		xQueueReceive( driver->onRxQueue,&buffer,portMAX_DELAY );
+		xQueueReceive( driver->onRxQueue,&block,portMAX_DELAY );
+
+		//checkeo el block, si error se crea ao error
+			errorCodes_t checkOk = BLOCK_OK;
+			//declaro un obj activo
+			if(checkOk != BLOCK_OK)
+			{
+				//creo el obj activo de error y le paso la callback de error
+				// 				insert_error_msg(buffer,checkOk);
+
+			}
+
+			// si no error de formato
+			else
+			{
+				char C = block[N_ELEMENTS];
+				switch(C)
+				{
+					case FPASCAL:
+						index = AO_PASCAL;
 
 
-		//este es de AO.c
-		event_dispacher(buffer);
+
+						//creo objeto activo pascal. Antes de la creacion debo enviarle el block a la queue del objeto activo
+						break;
+					case FCAMEL:
+						index = AO_CAMEL;
+
+						//creo objeto activo  camel
+						break;
+					case FSNAKE:
+						index = AO_SNAKE;
+
+						//creo objeto activo snake
+						break;
+					default:
+						break;
+				}
+				if(active_objects[index]->state ==AO_OFF)
+				{
+					create_ao(active_objects[index],callbacks[index],0);
+				}
+				 post_AO(active_objects[index],block);
+
+			}
+
+
 
 		gpioToggle(CHECK_LED);
 	}

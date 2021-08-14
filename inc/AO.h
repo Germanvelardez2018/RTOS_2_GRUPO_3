@@ -58,7 +58,7 @@ bool_t create_ao(ao_base_t* obj, callback_ao_t action,uint8_t priorty);
 
  void send_block_ao(ao_base_t* obj, void* block);
 
-
+ void post_AO(ao_base_t* obj, char* block);
 
 
 #endif /* RTOS2_VERSION_FINAL_RTOS_INC_AO_H_ */
