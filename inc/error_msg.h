@@ -37,6 +37,9 @@ void  insert_error_msg_0(char* b);
 void  insert_error_msg_1(char* b);
 
 
+void insert_error(char* block,errorCodes_t type);
+
+
 
 
 #endif /* RTOS2_REPOSITORIO_OFICIAL_GIT_RESUELTO_RTOS_2_GRUPO_3_INC_ERROR_MSG_H_ */

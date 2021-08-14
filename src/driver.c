@@ -24,7 +24,7 @@
 /*==================================Declaracion Defines============================*/
 
 #define CHECK_LED 	LED1
-#define AO_SIZE			5
+#define AO_SIZE			3
 #define N_ELEMENTS		5
 #define C_POS			4
 
@@ -50,22 +50,22 @@
 	ao_base_t ao_error_0 = { .state = AO_OFF };
 	ao_base_t ao_error_1 = { .state = AO_OFF };
 
+	ao_error_t   ao_error = {.ao_base.state = AO_OFF};
+
 
 	//ARRAY para ordenarlos mejor
 	ao_base_t* active_objects[AO_SIZE] = {
 			&ao_snake,
 			&ao_camel,
 			&ao_pascal,
-			&ao_error_0,
-			&ao_error_1 };
+		 };
 
 	callback_ao_t callbacks[AO_SIZE] =
 	{
 		  set_snake,
 		  set_camel,
 		  set_pascal,
-		  insert_error_msg_0,
-		  insert_error_msg_1
+
 	};
 
 	char* block;
@@ -91,22 +91,14 @@
 
 
 			//creo el obj activo de error y le paso la callback de error
-			if(checkOk == ERROR_INVALID_OPCODE)  //ERROR 0
-			{
-				if (active_objects[AO_ERROR_0]->state == AO_OFF)
-					{
-						create_ao(active_objects[AO_ERROR_0], driver,callbacks[AO_ERROR_0], 0);
-						post_AO(active_objects[AO_ERROR_0], block);
-					}
-			}
-			else
-			{
-				if (active_objects[AO_ERROR_1]->state == AO_OFF)
-				{
-					create_ao(active_objects[AO_ERROR_1], driver,callbacks[AO_ERROR_1], 0);
-					post_AO(active_objects[AO_ERROR_1], block);
-				}
-			}
+
+
+			create_error_ao(&ao_error,driver,insert_error,checkOk,0);
+
+			post_AO(ao_error.ao_base.queue, block);
+
+
+
 		}
 
 		/*Si el bloque es correcto se le da formato*/

@@ -15,8 +15,7 @@
 #include "task.h"
 #include "sapi.h"
 #include "driver.h"
-
-
+#include "error_msg.h"
 #define N_QUEUE_AO	2
 
 
@@ -34,6 +33,7 @@ typedef enum
 
 typedef void   (*callback_ao_t)(char*);
 
+typedef void (*error_callback_t)(char*,errorCodes_t);
 
 
 typedef struct
@@ -47,6 +47,14 @@ typedef struct
 ao_base_t;
 
 
+typedef struct
+{
+    error_callback_t e_callback;
+    errorCodes_t type_error;
+    ao_base_t ao_base;
+} ao_error_t;
+
+
 
 void post_AO(ao_base_t* obj, char* block);
 
@@ -55,6 +63,7 @@ void post_AO(ao_base_t* obj, char* block);
 
 
 bool_t create_ao(ao_base_t* obj,driver_t* driver, callback_ao_t action,uint8_t priorty);
+bool_t create_error_ao(ao_error_t* error, driver_t* driver, error_callback_t action,errorCodes_t error_type,uint8_t priorty);
 
 
  void send_block_ao(ao_base_t* obj, void* block);
