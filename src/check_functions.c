@@ -38,22 +38,19 @@ static bool check_opcode(char* block);
 
 /*================================Funciones publicas==============================*/
 
+
+/*Funcion que realiza los chequeos del bloque antes de pasarlo para darle formato*/
 errorCodes_t check_block(char* block)
 {
-
-
 	if(	!check_secuence(block))
 	{
 		return ERROR_INVALID_DATA;//ERROR_SECUENCE;
 	}
 
-
-
 	if(!check_CRC(block))
 	{
 		return ERROR_INVALID_DATA ;//ERROR_CRC
 	}
-
 
    if(!check_msg( block))
     {
@@ -72,7 +69,7 @@ errorCodes_t check_block(char* block)
 /*================================Funciones privadas================================*/
 
 /*Secuencia debe ser numero*/
-static bool check_secuence(char* block)   //verificada. Funciona
+static bool check_secuence(char* block)
 {
 	bool res = true;  // por defecto
 
@@ -110,24 +107,19 @@ static bool check_CRC(char* block)
 	bool res = true;
 	int8_t size = strlen(block)  ;
 
-	/*
-	 *   secuencia|C| mensaje| crc
-	 *
-	 * */
-
-	//estraigo el CRC del mensaje y lo convierto
+	/*Se extrae el crc del mensaje y se pasa a un entero*/
 	char CRC[2];
 	CRC[0]=block[size-2];
 	CRC[1] = block [size -1];
 
 
 
-	int crc_mensaje = 0;
-	crc_mensaje = ASCII_to_int(CRC);
-	//calculo el CRC yo mismo
-	uint8_t crc_calculado = crc8_calc(0,block,size-2);
+	int crcMensaje = 0;
+	crcMensaje = ASCII_to_int(CRC);
+	/*Se calcula el crc*/
+	uint8_t crcCalculado = crc8_calc(0,block,size-2);
 
-	if( crc_mensaje != crc_calculado)
+	if( crcMensaje != crcCalculado)
 	{
 		res = false;
 	}
