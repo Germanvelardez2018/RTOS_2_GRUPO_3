@@ -14,11 +14,64 @@
 
 
 
+static ao_task(void* params)
+{
+	//recibe un objeto activo
+	ao_base_t *obj = (ao_base_t*)params;
+
+
+	  // Cuando hay un evento, lo procesamos.
+	    while( TRUE )
+	    {
+	        // Verifico si hay elementos para procesar en la cola. Si los hay, los proceso.
+	        if( uxQueueMessagesWaiting( obj->queue ) )
+	        {
+	            // Hago una lectura de la cola.
+	            BaseType_t res = xQueueReceive( obj->queue, &(obj->content), portMAX_DELAY );
+
+	            // Si la lectura fue exitosa, proceso el dato.
+	            if( res )
+	            {
+	                // Llamamos al callback correspondiente en base al comando que se le pas�.
+	                ( obj->action )( &(obj->content) );
+
+
+	              // content tiene el bloque con el formato ya cambiado, se debe enviar a queue out
+
+
+	            	xQueueSend( *(obj->output), &(obj->content), 0 );
+
+
+	            }
+	        }
+
+	        // Caso contrario, la cola est� vac�a, lo que significa que debo eliminar la tarea.
+	        else
+	        {
+	            // Cambiamos el estado de la variable de estado, para indicar que el objeto activo no existe m�s.
+	            actObj->itIsAlive = FALSE;
+
+	            // Borramos la cola del objeto activo.
+	            vQueueDelete( actObj->activeObjectQueue );
+
+	            // Y finalmente tenemos que eliminar la tarea asociada (suicidio).
+	            vTaskDelete( NULL );
+
+	        }
+	    }
+
+
+
+
+
+}
+
+
 static void inline _init_task_ao(ao_base_t* obj)
 {
 
 
-	TaskCreate(driver_task,				// Funcion de la tarea a ejecutar
+	TaskCreate(ao_task,				// Funcion de la tarea a ejecutar
 				(const char *) "active object", 	// Nombre de la tarea como String amigable para el usuario
 				configMINIMAL_STACK_SIZE * 4,   // Cantidad de stack de la tarea
 				obj,                    	// Parametros de tarea
@@ -39,6 +92,13 @@ static void inline _init_task_ao(ao_base_t* obj)
  {
 	 // asignacion
 	 obj->action = action;
+	 //inicio la queue
+	 obj->queue = xQueueCreate(N_QUEUE_AO, sizeof(char*));
+
+	 //referencio a queue TX de UART
+	 obj->output = output;
+
+	 //
 	 _init_task_ao(obj);
 
 

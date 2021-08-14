@@ -36,7 +36,7 @@ ao_base_t;
 
 
 
- void create_ao(ao_base_t* obj, call_back_ao_t action, bool_t dead, QueueHandle_t output,uint8_t priorty);
+ void create_ao(ao_base_t* obj, call_back_ao_t action, bool_t dead, QueueHandle_t* output,uint8_t priorty);
 
 
 
