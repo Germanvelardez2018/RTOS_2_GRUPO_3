@@ -118,8 +118,6 @@ typedef enum
 					case FPASCAL:
 						index = AO_PASCAL;
 
-
-
 						//creo objeto activo pascal. Antes de la creacion debo enviarle el block a la queue del objeto activo
 						break;
 					case FCAMEL:
@@ -244,7 +242,6 @@ static void  insert_error_msg(char* b, int8_t x)
 
 	b[OFFSET_MSG]='E';
 	int_to_ASCII(x, (b + OFFSET_MSG + 1));
-	//b[OFFSET_MSG+1]=_INT_TO_CHAR( x);
 	b[OFFSET_MSG+3]='\0';
 
 }

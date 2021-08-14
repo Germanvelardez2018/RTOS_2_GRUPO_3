@@ -61,7 +61,7 @@ void event_dispacher(msg_t block)
 }
 
 
-static void event_handler(ao_base_t* obj)
+static void event_handler(void* obj)
 {
 
 	BaseType_t retQueue;
