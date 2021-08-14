@@ -9,6 +9,7 @@
 #ifndef RTOS2_VERSION_FINAL_RTOS_INC_AO_H_
 #define RTOS2_VERSION_FINAL_RTOS_INC_AO_H_
 
+#include "FreeRTOSConfig.h"
 #include "FreeRTOS.h"
 #include "queue.h"
 #include "task.h"
@@ -16,18 +17,40 @@
 #define N_QUEUE_AO	5
 
 
-typedef void   (*call_back_ao_t)(char*);
+
+//queda mas piola
+
+typedef char* msg_t;
+
+typedef enum
+{
+	AO_ON,
+	AO_OFF
+} AO_state;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+typedef void   (*call_back_ao_t)(msg_t);
 
 
 
 typedef struct
 {
     void*          content;     //puntero usado para recibir datos de la queue
-    TaskHandle_t   task_name;   //Referencia a la task del objeto activo
 	QueueHandle_t  queue;      // cola de mensajes usada para enviar los blocks de los mensaje
-	QueueHandle_t  output;     // cola donde se envia el bloque procesado
 	call_back_ao_t action;     //callback
-	bool_t         dead_flag;  //flag que determina si el objeto se ejecuta una sola vez y muere
+	AO_state		state;
 	uint8_t 	   priority;   //
 
 }
@@ -36,7 +59,11 @@ ao_base_t;
 
 
 
-void create_ao(ao_base_t* obj, call_back_ao_t action, bool_t dead, QueueHandle_t output,uint8_t priorty);
+
+void event_dispacher(msg_t block);
+
+
+bool_t create_ao(ao_base_t* obj, call_back_ao_t action,uint8_t priorty);
 
 
  void send_block_ao(ao_base_t* obj, void* block);

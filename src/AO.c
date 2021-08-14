@@ -14,98 +14,79 @@
 
 
 
-static ao_task(void* params)
+void event_dispacher(msg_t block)
 {
-	//recibe un objeto activo
-	ao_base_t *obj = (ao_base_t*)params;
+	}
 
 
-	  // Cuando hay un evento, lo procesamos.
-	    while( TRUE )
-	    {
-	        // Verifico si hay elementos para procesar en la cola. Si los hay, los proceso.
-	        if( uxQueueMessagesWaiting( obj->queue ) )
-	        {
-	            // Hago una lectura de la cola.
-	            BaseType_t res = xQueueReceive( obj->queue, &(obj->content), portMAX_DELAY );
+static void event_handler(ao_base_t* obj)
+{
 
-	            // Si la lectura fue exitosa, proceso el dato.
-	            if( res )
-	            {
-	                // Llamamos al callback correspondiente en base al comando que se le pas�.
-	                ( obj->action )( &(obj->content) );
+	BaseType_t retQueue;
+	msg_t block;
+	ao_base_t* ao = (ao_base_t*) obj;
+	while(1)
+	{
+		if(uxQueueMessagesWaiting(ao->queue))
+		{
+			retQueue = xQueueSend(ao->queue,&block,0) ;// Evitar bloqueos
 
+			if(retQueue) //lectura exitosa, entonces llamo callback
+			{
+				(ao->action)(&block);
+			}
+		}
+		else
+		{
+			//
+			ao->state = AO_OFF;
+			vQueueDelete(ao->queue);
+			vTaskDelete(NULL);
+		}
 
-	              // content tiene el bloque con el formato ya cambiado
-	              // se  envia a queue out
-	            	xQueueSend( *(obj->output), &(obj->content), 0 );
-
-
-	            }
-	        }
-
-	        // Caso contrario, la cola est� vac�a, lo que significa que debo eliminar la tarea.
-	        else
-	        {
-
-
-	            // Borramos la cola del objeto activo.
-	            vQueueDelete( obj->queue );
-
-	            // Y finalmente tenemos que eliminar la tarea asociada (suicidio).
-	            vTaskDelete( NULL );
-
-	        }
-	    }
-
-
-
-
+	}
 
 }
 
 
-static void inline _init_task_ao(ao_base_t* obj)
+
+bool_t create_ao(ao_base_t* obj, call_back_ao_t action,uint8_t priorty)
 {
+	BaseType_t retValue = pdFALSE;
+
+	obj->queue = xQueueCreate(N_QUEUE_AO, sizeof(msg_t));
+
+	//el handler es generico para todos los objetos de este estilo
+	if(obj->queue != NULL)
+	{
+		//se asigna callback
+		obj->action = action;
 
 
-	TaskCreate(ao_task,				// Funcion de la tarea a ejecutar
-				(const char *) "active object", 	// Nombre de la tarea como String amigable para el usuario
-				configMINIMAL_STACK_SIZE * 4,   // Cantidad de stack de la tarea
-				obj,                    	// Parametros de tarea
-				tskIDLE_PRIORITY + obj->priority,           // Prioridad de la tarea
-				obj->task_name);                         	// Puntero a la tarea creada en el sistema
+		retValue = xTaskCreate(event_handler,(const char*)"AO generico", configMINIMAL_STACK_SIZE*2, obj, tskIDLE_PRIORITY+priorty, NULL);
+	}
 
-		//verificar resultado
+	if(retValue == pdFALSE)
+	{
+		obj->state = AO_ON;
 
-
-
+		return TRUE;
+	}
+	else
+	{
+		return FALSE;
+	}
 
 }
 
 
 
 
- void create_ao(ao_base_t* obj, call_back_ao_t action, bool_t dead, QueueHandle_t output,uint8_t priorty)
- {
-	 // asignacion
-	 obj->action = action;
-	 //inicio la queue
-	 obj->queue = xQueueCreate(N_QUEUE_AO, sizeof(char*));
-
-	 //referencio a queue TX de UART
-	 obj->output = output;
-
-	 //
-	 _init_task_ao(obj);
 
 
 
- }
 
-// esta funcion se usa en el task_driver---> que deberia transformarse en dispacher event
 
- void send_block_ao(ao_base_t* obj, void* block);
 
 
 
