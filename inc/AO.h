@@ -42,7 +42,7 @@ typedef struct
 	callback_ao_t action;     //callback
 	AO_state		state;
 	uint8_t 	   priority;   //
-
+	driver_t*     driver;
 }
 ao_base_t;
 

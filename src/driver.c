@@ -44,7 +44,6 @@ static void add_crc_at_block(char* block);
 
 
 
-static void send_block(char* block,driver_t* driver);
 
 
 /*================================Funciones publicas==============================*/
@@ -260,7 +259,7 @@ static void add_crc_at_block(char* block)
 	block[len +2]= '\0';
 }
 
-static void send_block(char* block,driver_t* driver)
+ void send_block(char* block,driver_t* driver)
 {
 	/*Antes de enviar el mensaje calcular CRC y agregarlo*/
 	add_crc_at_block(block);

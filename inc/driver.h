@@ -89,6 +89,7 @@ void driver_task(void* params);
 
 void led_task(void* params);
 
+void send_block(char* block,driver_t* driver);
 
 
 
