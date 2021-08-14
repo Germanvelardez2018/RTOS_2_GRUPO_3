@@ -67,7 +67,7 @@ static void send_block(char* block,driver_t* driver);
 
 
 		//este es de AO.c
-		event_dispacher(block);
+		event_dispacher(buffer);
 
 		gpioToggle(CHECK_LED);
 	}

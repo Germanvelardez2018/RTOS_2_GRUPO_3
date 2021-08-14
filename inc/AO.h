@@ -31,17 +31,7 @@ typedef enum
 
 
 
-
-
-
-
-
-
-
-
-
-
-typedef void   (*call_back_ao_t)(msg_t);
+typedef void   (*callback_ao_t)(msg_t);
 
 
 
@@ -49,7 +39,7 @@ typedef struct
 {
     void*          content;     //puntero usado para recibir datos de la queue
 	QueueHandle_t  queue;      // cola de mensajes usada para enviar los blocks de los mensaje
-	call_back_ao_t action;     //callback
+	callback_ao_t action;     //callback
 	AO_state		state;
 	uint8_t 	   priority;   //
 
@@ -63,7 +53,7 @@ ao_base_t;
 void event_dispacher(msg_t block);
 
 
-bool_t create_ao(ao_base_t* obj, call_back_ao_t action,uint8_t priorty);
+bool_t create_ao(ao_base_t* obj, callback_ao_t action,uint8_t priorty);
 
 
  void send_block_ao(ao_base_t* obj, void* block);
