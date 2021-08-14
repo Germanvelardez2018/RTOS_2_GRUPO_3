@@ -13,6 +13,7 @@
 #include "check_functions.h"
 #include "msg_format.h"
 #include "error_msg.h"
+
 #include <string.h>
 
 #include "AO.h"
@@ -23,8 +24,8 @@
 /*==================================Declaracion Defines============================*/
 
 #define CHECK_LED 	LED1
-#define AO_SIZE			4
-#define N_ELEMENTS		4
+#define AO_SIZE			5
+#define N_ELEMENTS		5
 
 
 /*============================Declaracion de funciones privadas====================*/
@@ -56,13 +57,22 @@
 
 	ao_base_t ao_pascal = { .state = AO_OFF };
 
-	ao_base_t ao_error = { .state = AO_OFF };
+	ao_base_t ao_error_0 = { .state = AO_OFF };
+	ao_base_t ao_error_1 = { .state = AO_OFF };
+
+
 
 	ao_base_t* active_objects[AO_SIZE] = { &ao_snake, &ao_camel, &ao_pascal,
-			&ao_error };
+			&ao_error_0,&ao_error_1 };
 
-	callback_ao_t callbacks[AO_SIZE] = { set_snake, set_camel, set_pascal,
-	NULL };
+	callback_ao_t callbacks[AO_SIZE] =
+	{
+			set_snake,
+			set_camel,
+			set_pascal,
+			insert_error_msg_0,
+			insert_error_msg_1
+	};
 
 	uint8_t index = 0;
 
@@ -81,8 +91,31 @@
 		if (checkOk != BLOCK_OK)
 		{
 			//creo el obj activo de error y le paso la callback de error
-			// 				insert_error_msg(buffer,checkOk);
-			printf("eeror\n");
+			if(checkOk == ERROR_INVALID_OPCODE)
+			{
+				if (active_objects[AO_ERROR_0]->state == AO_OFF)
+					{
+						bool res = create_ao(active_objects[index], driver,callbacks[AO_ERROR_0], 0);
+
+						post_AO(active_objects[AO_ERROR_0], block);
+
+					}
+
+			}
+			else
+			{
+
+					if (active_objects[AO_ERROR_1]->state == AO_OFF)
+					{
+						bool res = create_ao(active_objects[index], driver,
+								callbacks[AO_ERROR_1], 0);
+
+					post_AO(active_objects[AO_ERROR_1], block);
+					}
+
+			}
+
+
 		}
 
 		/*Si el bloque es correcto se le da formato*/

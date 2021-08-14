@@ -47,7 +47,8 @@ typedef enum
 	AO_SNAKE,
 	AO_CAMEL,
 	AO_PASCAL,
-	AO_ERROR
+	AO_ERROR_0,
+	AO_ERROR_1
 }OBJECT_INDEX;
 
 
