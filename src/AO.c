@@ -33,7 +33,7 @@ static void event_handler(void* obj);
 
 
 
-bool_t create_ao(ao_base_t* obj, callback_ao_t action,uint8_t priorty)
+bool_t create_ao(ao_base_t* obj, driver_t* driver, callback_ao_t action,uint8_t priorty)
 {
 	BaseType_t retValue = pdFALSE;
 
