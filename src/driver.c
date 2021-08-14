@@ -106,6 +106,10 @@ static void event_dispacher(ao_base_t* obj, char* block)
 		xQueueReceive( driver->onRxQueue,&buffer,portMAX_DELAY );
 
 
+		ao_base_t obj;
+
+		event_dispacher(&obj,buffer);
+
 
 		//aqui empieza el dispacher y las modificaciones complejas
 
@@ -116,20 +120,20 @@ static void event_dispacher(ao_base_t* obj, char* block)
 
 
 
-
+		/*
 		errorCodes_t checkOk = BLOCK_OK;
 
 
 		if(buffer !=NULL) //No DEBERIA RECIBIR NULL,pero conviene validar
 		{
-			/* Se controla formato, secuencia y CRC*/
+			// Se controla formato, secuencia y CRC
 			checkOk = check_block(buffer);
 
 
 			if(checkOk == BLOCK_OK)
 			{
-				/* Se envia el bloque a transmision
-				 * Solo se cambia formato si el contenido del block es valido. Se libera bloque en la funcion*/
+				// Se envia el bloque a transmision
+				 // Solo se cambia formato si el contenido del block es valido. Se libera bloque en la funcion
 				change_format(buffer);
 			}
 			else    //ERROR EN EL MENSAJE
@@ -140,7 +144,10 @@ static void event_dispacher(ao_base_t* obj, char* block)
 
 			//La funcion send_block siempre se llama
 			  send_block(buffer,driver);
+
 		}
+		 */
+
 		gpioToggle(CHECK_LED);
 	}
 }
