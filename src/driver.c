@@ -23,6 +23,8 @@
 /*==================================Declaracion Defines============================*/
 
 #define CHECK_LED 	LED1
+#define AO_SIZE			4
+#define N_ELEMENTS		4
 
 
 /*============================Declaracion de funciones privadas====================*/
@@ -48,16 +50,8 @@ static void add_crc_at_block(char* block);
 
 /*================================Funciones publicas==============================*/
 
-#define AO_SIZE			4
-#define N_ELEMENTS		4
 
-typedef enum
-{
-	AO_SNAKE,
-	AO_CAMEL,
-	AO_PASCAL,
-	AO_ERROR
-}OBJECT_INDEX;
+
 
  void driver_task(void* params)
 {

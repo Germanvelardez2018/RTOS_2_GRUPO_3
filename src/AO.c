@@ -12,6 +12,12 @@
 #include "sapi.h"
 #include "error_msg.h"
 
+/*============================Declaracion de funciones privadas====================*/
+
+static void event_handler(void* obj);
+
+
+/*================================Funciones publicas==============================*/
 
 
  void post_AO(ao_base_t* obj, char* block)
@@ -61,37 +67,6 @@ void event_dispacher(msg_t block)
 }
 
 
-static void event_handler(void* obj)
-{
-
-	BaseType_t retQueue;
-	msg_t block;
-	ao_base_t* ao = (ao_base_t*) obj;
-	while(1)
-	{
-		if(uxQueueMessagesWaiting(ao->queue))
-		{
-			retQueue = xQueueSend(ao->queue,&block,0) ;// Evitar bloqueos
-
-			if(retQueue) //lectura exitosa, entonces llamo callback
-			{
-				(ao->action)(block);
-			}
-		}
-		else
-		{
-			//
-			ao->state = AO_OFF;
-			vQueueDelete(ao->queue);
-			vTaskDelete(NULL);
-		}
-
-	}
-
-}
-
-
-
 bool_t create_ao(ao_base_t* obj, callback_ao_t action,uint8_t priorty)
 {
 	BaseType_t retValue = pdFALSE;
@@ -117,6 +92,41 @@ bool_t create_ao(ao_base_t* obj, callback_ao_t action,uint8_t priorty)
 	else
 	{
 		return FALSE;
+	}
+
+}
+
+
+
+
+/*================================Funciones privadas================================*/
+
+
+static void event_handler(void* obj)
+{
+
+	BaseType_t retQueue;
+	msg_t block;
+	ao_base_t* ao = (ao_base_t*) obj;
+	while(1)
+	{
+		if(uxQueueMessagesWaiting(ao->queue))
+		{
+			retQueue = xQueueSend(ao->queue,&block,0) ;// Evitar bloqueos
+
+			if(retQueue) //lectura exitosa, entonces llamo callback
+			{
+				(ao->action)(block);
+			}
+		}
+		else
+		{
+			//
+			ao->state = AO_OFF;
+			vQueueDelete(ao->queue);
+			vTaskDelete(NULL);
+		}
+
 	}
 
 }

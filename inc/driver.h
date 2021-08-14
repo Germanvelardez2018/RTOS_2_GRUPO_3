@@ -42,6 +42,14 @@ typedef enum
 	FLOW_CLOSE
 } state_flow;
 
+typedef enum
+{
+	AO_SNAKE,
+	AO_CAMEL,
+	AO_PASCAL,
+	AO_ERROR
+}OBJECT_INDEX;
+
 
 
 typedef struct {
