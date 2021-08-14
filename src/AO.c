@@ -36,9 +36,8 @@ static ao_task(void* params)
 	                ( obj->action )( &(obj->content) );
 
 
-	              // content tiene el bloque con el formato ya cambiado, se debe enviar a queue out
-
-
+	              // content tiene el bloque con el formato ya cambiado
+	              // se  envia a queue out
 	            	xQueueSend( *(obj->output), &(obj->content), 0 );
 
 
@@ -48,11 +47,10 @@ static ao_task(void* params)
 	        // Caso contrario, la cola est� vac�a, lo que significa que debo eliminar la tarea.
 	        else
 	        {
-	            // Cambiamos el estado de la variable de estado, para indicar que el objeto activo no existe m�s.
-	            actObj->itIsAlive = FALSE;
+
 
 	            // Borramos la cola del objeto activo.
-	            vQueueDelete( actObj->activeObjectQueue );
+	            vQueueDelete( obj->queue );
 
 	            // Y finalmente tenemos que eliminar la tarea asociada (suicidio).
 	            vTaskDelete( NULL );
@@ -105,7 +103,7 @@ static void inline _init_task_ao(ao_base_t* obj)
 
  }
 
-
+// esta funcion se usa en el task_driver---> que deberia transformarse en dispacher event
 
  void send_block_ao(ao_base_t* obj, void* block);
 
