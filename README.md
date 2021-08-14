@@ -89,7 +89,7 @@ Se modifico lo siguiente:
 </h4>
 =======================================================
 <figure style="float: center">
-  <img src="AO_DIAGRAMA.png" >
+  <img src="diagrama_v2.png" >
   
 </figure>
 
