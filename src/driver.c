@@ -90,7 +90,7 @@
 
 
 			//creo el obj activo de error y le paso la callback de error
-
+			printf("error:%d\n",checkOk);
 
 			create_error_ao(&ao_error,driver,insert_error,checkOk,0);
 

@@ -77,7 +77,7 @@ bool_t create_error_ao(ao_error_t* error, driver_t* driver, error_callback_t act
 {
 	BaseType_t retValue = pdFALSE;
 	error->ao_base.queue = xQueueCreate(N_QUEUE_AO, sizeof(char*));
-
+	error->type_error= error_type;
 	error->ao_base.driver = driver;
 
 	//el handler es generico para todos los objetos de este estilo
