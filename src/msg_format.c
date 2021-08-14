@@ -37,13 +37,13 @@ void change_format(char *block)
 	{
 
 	case FPASCAL:
-		set_pascal(block, pos_init, pos_end);
+		set_pascal(block);
 		break;
 	case FCAMEL:
-		set_camel(block, pos_init, pos_end);
+		set_camel(block);
 		break;
 	case FSNAKE:
-		set_snake(block, pos_init, pos_end);
+		set_snake(block);
 		break;
 
 	default:
@@ -64,8 +64,8 @@ void change_format(char *block)
 static void set_pascal(char *block)
 {
 	uint8_t pos_end = strlen(block) - CRC_SIZE; //Posicion final del mensaje a cambiarle el formato
-	uint8_t pos_read = START_DATA_POSITION;;  //Posicion de lectura
-	uint8_t pos_write = START_DATA_POSITION;; //Posicion de escritura
+	uint8_t pos_read = START_DATA_POSITION;  //Posicion de lectura
+	uint8_t pos_write = START_DATA_POSITION; //Posicion de escritura
 
 	for (; pos_read < pos_end; pos_read++)
 	{
@@ -74,7 +74,7 @@ static void set_pascal(char *block)
 			pos_read++;
 			block[pos_write] = toupper(block[pos_read]);
 		}
-		else if (pos_read == pos_init)
+		else if (pos_read == START_DATA_POSITION)
 		{
 			block[pos_write] = toupper(block[pos_read]);
 		}
@@ -90,8 +90,8 @@ static void set_pascal(char *block)
 static void set_camel(char *block)
 {
 	uint8_t pos_end = strlen(block) - CRC_SIZE; //Posicion final del mensaje a cambiarle el formato
-	uint8_t pos_read = START_DATA_POSITION;;  //Posicion de lectura
-	uint8_t pos_write = START_DATA_POSITION;; //Posicion de escritura
+	uint8_t pos_read = START_DATA_POSITION;  //Posicion de lectura
+	uint8_t pos_write = START_DATA_POSITION; //Posicion de escritura
 
 	for (; pos_read < pos_end; pos_read++)
 	{
@@ -100,7 +100,7 @@ static void set_camel(char *block)
 			pos_read++;
 			block[pos_write] = toupper(block[pos_read]);
 		}
-		else if (pos_read == pos_init)
+		else if (pos_read == START_DATA_POSITION)
 		{
 			block[pos_write] = tolower(block[pos_read]);
 		}
@@ -117,8 +117,8 @@ static void set_snake(char *block)
 {
 	char aux_block[FRAME_MAX_SIZE];
 	uint8_t pos_end = strlen(block) - CRC_SIZE; //Posicion final del mensaje a cambiarle el formato
-	uint8_t pos_read = START_DATA_POSITION;;  //Posicion de lectura
-	uint8_t pos_write = START_DATA_POSITION;; //Posicion de escritura
+	uint8_t pos_read = START_DATA_POSITION;  //Posicion de lectura
+	uint8_t pos_write = START_DATA_POSITION; //Posicion de escritura
 
 	strcpy(aux_block, block); //Se deja una copia del string original para poder realizar la operacion
 
@@ -128,7 +128,7 @@ static void set_snake(char *block)
 		{
 			block[pos_write] = '_';
 		}
-		else if (isupper(aux_block[pos_read]) && (pos_read != pos_init))
+		else if (isupper(aux_block[pos_read]) && (pos_read != START_DATA_POSITION))
 		{
 			block[pos_write] = '_';
 			pos_write++;
