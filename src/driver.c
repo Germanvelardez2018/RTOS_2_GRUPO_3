@@ -52,12 +52,10 @@ static void add_crc_at_block(char* block);
 
 
 
-
  void driver_task(void* params)
 {
 	char* block;
 	driver_t* driver = (driver_t*) params;
-
 	ao_base_t ao_snake = {.state = AO_OFF};
 	ao_base_t ao_camel = {.state = AO_OFF};
 
@@ -95,11 +93,12 @@ static void add_crc_at_block(char* block);
 		/*Se chequea el block, si da error se crea ao error*/
 			errorCodes_t checkOk = BLOCK_OK;
 			/*Se declara un objeto activo*/
+
 			if(checkOk != BLOCK_OK)
 			{
 				//creo el obj activo de error y le paso la callback de error
 				// 				insert_error_msg(buffer,checkOk);
-
+				printf("eeror\n");
 			}
 
 			/*Si el bloque es correcto se le da formato*/
@@ -124,7 +123,11 @@ static void add_crc_at_block(char* block);
 				/*Se crea el objeto activo*/
 				if(active_objects[index]->state ==AO_OFF)
 				{
-					create_ao(active_objects[index],callbacks[index],0);
+				 bool res =	create_ao(active_objects[index],driver,callbacks[index],0);
+				 if(res != false)
+				 {
+				 printf("no se creo el objeto\n");
+
 				}
 				 post_AO(active_objects[index],block);
 
@@ -250,6 +253,7 @@ static void add_crc_at_block(char* block)
 }
 
  void send_block(char* block,driver_t* driver)
+
 {
 	/*Antes de enviar el mensaje calcular CRC y agregarlo*/
 	add_crc_at_block(block);
