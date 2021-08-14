@@ -26,20 +26,9 @@
 #define CHECK_LED 	LED1
 #define AO_SIZE			5
 #define N_ELEMENTS		5
-
+#define C_POS			4
 
 /*============================Declaracion de funciones privadas====================*/
-
-
-
-
-
-/*Recibe el bloque enviado por queue, debe verificar CRC8 y demas verificaciones
- *
- * Se usa la memoria dinamica del bloque recibido, se escribe el nuevo contenido y se vuelve a enviar para transmitir.
- * Una vez transmitido, liberar.
- * */
-
 
 
 
@@ -50,33 +39,40 @@
 
  void driver_task(void* params)
  {
-	char* block;
+
 	driver_t* driver = (driver_t*) params;
+
+
+	// objetos activos para cada tipo de procesamiento posible
 	ao_base_t ao_snake = { .state = AO_OFF };
 	ao_base_t ao_camel = { .state = AO_OFF };
-
 	ao_base_t ao_pascal = { .state = AO_OFF };
-
 	ao_base_t ao_error_0 = { .state = AO_OFF };
 	ao_base_t ao_error_1 = { .state = AO_OFF };
 
 
-
-	ao_base_t* active_objects[AO_SIZE] = { &ao_snake, &ao_camel, &ao_pascal,
-			&ao_error_0,&ao_error_1 };
+	//ARRAY para ordenarlos mejor
+	ao_base_t* active_objects[AO_SIZE] = {
+			&ao_snake,
+			&ao_camel,
+			&ao_pascal,
+			&ao_error_0,
+			&ao_error_1 };
 
 	callback_ao_t callbacks[AO_SIZE] =
 	{
-			set_snake,
-			set_camel,
-			set_pascal,
-			insert_error_msg_0,
-			insert_error_msg_1
+		  set_snake,
+		  set_camel,
+		  set_pascal,
+		  insert_error_msg_0,
+		  insert_error_msg_1
 	};
 
+	char* block;
 	uint8_t index = 0;
 
-	while (1)
+
+	while (TRUE)
 	{
 		gpioToggle(CHECK_LED);
 
@@ -88,40 +84,37 @@
 		errorCodes_t checkOk = BLOCK_OK;
 		/*Se declara un objeto activo*/
 
+		checkOk = check_block(block);
+
 		if (checkOk != BLOCK_OK)
 		{
+
+
 			//creo el obj activo de error y le paso la callback de error
-			if(checkOk == ERROR_INVALID_OPCODE)
+			if(checkOk == ERROR_INVALID_OPCODE)  //ERROR 0
 			{
 				if (active_objects[AO_ERROR_0]->state == AO_OFF)
 					{
-						bool res = create_ao(active_objects[index], driver,callbacks[AO_ERROR_0], 0);
-
+						create_ao(active_objects[AO_ERROR_0], driver,callbacks[AO_ERROR_0], 0);
 						post_AO(active_objects[AO_ERROR_0], block);
-
 					}
-
 			}
 			else
 			{
-
-					if (active_objects[AO_ERROR_1]->state == AO_OFF)
-					{
-						bool res = create_ao(active_objects[index], driver,
-								callbacks[AO_ERROR_1], 0);
-
+				if (active_objects[AO_ERROR_1]->state == AO_OFF)
+				{
+					create_ao(active_objects[AO_ERROR_1], driver,callbacks[AO_ERROR_1], 0);
 					post_AO(active_objects[AO_ERROR_1], block);
-					}
-
+				}
 			}
-
-
 		}
 
 		/*Si el bloque es correcto se le da formato*/
 		else
 		{
-			char C = block[N_ELEMENTS];
+
+
+			char C = block[C_POS];
 			/*Se define el objeto activo*/
 			switch (C)
 			{
@@ -140,16 +133,14 @@
 			/*Se crea el objeto activo*/
 			if (active_objects[index]->state == AO_OFF)
 			{
-				bool res = create_ao(active_objects[index], driver,
-						callbacks[index], 0);
-				if (res != false)
-				{
-					printf("no se creo el objeto\n");
 
-				}
+				create_ao(active_objects[index], driver,callbacks[index], 0);
+
 				post_AO(active_objects[index], block);
 
+
 			}
+
 		}
 
 		gpioToggle(CHECK_LED);
@@ -218,31 +209,8 @@ bool_t driver_init(driver_t* driver)
 
 }
 
-/*
- * Funcion testigo
- */
-
-void led_task(void* params)
-{
-
-	while(1)
-	{
-		gpioToggle(LED3);
-		vTaskDelay( 200 );
-
-	}
-
-}
-
-void  insert_error_msg(char* b, int8_t x)
-{
 
 
-	b[OFFSET_MSG]='E';
-	int_to_ASCII(x, (b + OFFSET_MSG + 1));
-	b[OFFSET_MSG+3]='\0';
-
-}
 
 void add_crc_at_block(char* block)
 {

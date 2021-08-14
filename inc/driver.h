@@ -100,7 +100,6 @@ void led_task(void* params);
 
 void send_block(char* block,driver_t* driver);
 
-void  insert_error_msg(char* b, int8_t x);
 
 void add_crc_at_block(char* block);
 

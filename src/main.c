@@ -10,11 +10,6 @@
 #include "FreeRTOSConfig.h"
 
 #include "task.h"
-//#include "sapi.h"
-
-//#include "semphr.h"
-//#include "protocol.h"
-
 #include "driver.h"
 
 /*==================================Declaracion Defines============================*/
@@ -43,10 +38,10 @@ int main(void)
 
 
 	xTaskCreate(driver_task,				// Funcion de la tarea a ejecutar
-			(const char *) "wait_frame", 	// Nombre de la tarea como String amigable para el usuario
-			configMINIMAL_STACK_SIZE * 4,   // Cantidad de stack de la tarea
+			(const char *) "modulo driver", 	// Nombre de la tarea como String amigable para el usuario
+			configMINIMAL_STACK_SIZE * 8,   // Cantidad de stack de la tarea
 			&driver,                    	// Parametros de tarea
-			tskIDLE_PRIORITY + 1,           // Prioridad de la tarea
+			tskIDLE_PRIORITY + 0,           // Prioridad de la tarea
 			0);                         	// Puntero a la tarea creada en el sistema
 
 

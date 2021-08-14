@@ -17,13 +17,11 @@
 #include "driver.h"
 
 
-#define N_QUEUE_AO	5
+#define N_QUEUE_AO	2
 
 
 
-//queda mas piola
 
-typedef char* msg_t;
 
 typedef enum
 {
@@ -34,26 +32,26 @@ typedef enum
 
 
 
-typedef void   (*callback_ao_t)(msg_t);
+typedef void   (*callback_ao_t)(char*);
 
 
 
 typedef struct
 {
-    msg_t         message;
+    char*         message;
 	QueueHandle_t  queue;      // cola de mensajes usada para enviar los blocks de los mensaje
 	callback_ao_t action;     //callback
 	AO_state		state;
-	driver_t*     driver;
+	driver_t*     driver;   //NECESARIO PARA conectarse con UART
 }
 ao_base_t;
 
 
 
-void post_AO(ao_base_t* obj, msg_t block);
+void post_AO(ao_base_t* obj, char* block);
 
 
-void event_dispacher(msg_t block);
+
 
 
 bool_t create_ao(ao_base_t* obj,driver_t* driver, callback_ao_t action,uint8_t priorty);

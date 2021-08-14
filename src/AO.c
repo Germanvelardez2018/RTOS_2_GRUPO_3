@@ -21,10 +21,10 @@ static void event_handler(void* obj);
 
 
 
- void post_AO(ao_base_t* obj, msg_t block)
+ void post_AO(ao_base_t* obj, char*  block)
 
 {
-	xQueueSend(obj->queue,&block,0);
+	xQueueSend(obj->queue,&block,1);
 }
 
 
@@ -36,25 +36,23 @@ static void event_handler(void* obj);
 bool_t create_ao(ao_base_t* obj, driver_t* driver, callback_ao_t action,uint8_t priorty)
 {
 	BaseType_t retValue = pdFALSE;
+	obj->queue = xQueueCreate(N_QUEUE_AO, sizeof(char*));
 
 	obj->driver = driver;
-
-	obj->queue = xQueueCreate(N_QUEUE_AO, sizeof(msg_t));
 
 	//el handler es generico para todos los objetos de este estilo
 	if(obj->queue != NULL)
 	{
 		//se asigna callback
 		obj->action = action;
+		retValue = xTaskCreate(event_handler,(const char*)"AO generico", configMINIMAL_STACK_SIZE*8, obj, tskIDLE_PRIORITY+priorty, NULL);
 
 
-		retValue = xTaskCreate(event_handler,(const char*)"AO generico", configMINIMAL_STACK_SIZE*2, obj, tskIDLE_PRIORITY+priorty, NULL);
 	}
 
-	if(retValue == pdFALSE)
+	if(retValue != pdFALSE)
 	{
 		obj->state = AO_ON;
-
 		return TRUE;
 	}
 	else
@@ -70,26 +68,33 @@ bool_t create_ao(ao_base_t* obj, driver_t* driver, callback_ao_t action,uint8_t 
 /*================================Funciones privadas================================*/
 
 
+/*
+ * event handler generico para todos los objetos activos definidos en este modulo
+ * */
+
 static void event_handler(void* obj)
 {
 
 	BaseType_t retQueue;
-	msg_t block;
+
 	ao_base_t* ao = (ao_base_t*) obj;
+
+
 	while(1)
 	{
 		if(uxQueueMessagesWaiting(ao->queue))
 		{
-			retQueue = xQueueSend(ao->queue,&block,0) ;// Evitar bloqueos
+			retQueue = xQueueReceive(ao->queue,&(ao->message),0) ;// Evitar bloqueos
 
 			if(retQueue) //lectura exitosa, entonces llamo callback
 			{
-				(ao->action)(block);
+				(*ao->action)((ao->message));
+				send_block((ao->message),ao->driver);
 			}
 		}
 		else
 		{
-			//
+
 			ao->state = AO_OFF;
 			vQueueDelete(ao->queue);
 			vTaskDelete(NULL);
