@@ -99,9 +99,9 @@ typedef enum
 		 * Se espera a que venga un bloque por la cola*/
 		xQueueReceive( driver->onRxQueue,&block,portMAX_DELAY );
 
-		//checkeo el block, si error se crea ao error
+		/*Se chequea el block, si da error se crea ao error*/
 			errorCodes_t checkOk = BLOCK_OK;
-			//declaro un obj activo
+			/*Se declara un objeto activo*/
 			if(checkOk != BLOCK_OK)
 			{
 				//creo el obj activo de error y le paso la callback de error
@@ -109,30 +109,26 @@ typedef enum
 
 			}
 
-			// si no error de formato
+			/*Si el bloque es correcto se le da formato*/
 			else
 			{
 				char C = block[N_ELEMENTS];
+				/*Se define el objeto activo*/
 				switch(C)
 				{
 					case FPASCAL:
 						index = AO_PASCAL;
-
-						//creo objeto activo pascal. Antes de la creacion debo enviarle el block a la queue del objeto activo
 						break;
 					case FCAMEL:
 						index = AO_CAMEL;
-
-						//creo objeto activo  camel
 						break;
 					case FSNAKE:
 						index = AO_SNAKE;
-
-						//creo objeto activo snake
 						break;
 					default:
 						break;
 				}
+				/*Se crea el objeto activo*/
 				if(active_objects[index]->state ==AO_OFF)
 				{
 					create_ao(active_objects[index],callbacks[index],0);
