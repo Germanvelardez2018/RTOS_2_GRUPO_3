@@ -47,8 +47,7 @@
 	ao_base_t ao_snake = { .state = AO_OFF };
 	ao_base_t ao_camel = { .state = AO_OFF };
 	ao_base_t ao_pascal = { .state = AO_OFF };
-	ao_base_t ao_error_0 = { .state = AO_OFF };
-	ao_base_t ao_error_1 = { .state = AO_OFF };
+
 
 	ao_error_t   ao_error = {.ao_base.state = AO_OFF};
 
