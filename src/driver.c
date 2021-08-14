@@ -52,46 +52,6 @@ static void send_block(char* block,driver_t* driver);
 
 
 
-static void event_dispacher(ao_base_t* obj, char* block)
-{
-
-
-	//checkeo el block, si error se crea ao error
-	errorCodes_t checkOk = BLOCK_OK;
-	//declaro un obj activo
-	if(checkOk != BLOCK_OK)
-	{
-		//creo el obj activo de error y le paso la callback de error
-		// 				insert_error_msg(buffer,checkOk);
-
-	}
-
-	// si no error de formato
-	else
-	{
-			char C = block[4];
-		switch(C)
-		{
-		case FPASCAL:
-			//creo objeto activo pascal. Antes de la creacion debo enviarle el block a la queue del objeto activo
-			break;
-		case FCAMEL:
-			//creo objeto activo  camel
-			break;
-		case FSNAKE:
-			//creo objeto activo snake
-
-			break;
-		}
-
-
-	}
-
-
-
-
-}
-
  void driver_task(void* params)
 {
 	char* buffer;
@@ -106,47 +66,8 @@ static void event_dispacher(ao_base_t* obj, char* block)
 		xQueueReceive( driver->onRxQueue,&buffer,portMAX_DELAY );
 
 
-		ao_base_t obj;
-
-		event_dispacher(&obj,buffer);
-
-
-		//aqui empieza el dispacher y las modificaciones complejas
-
-
-		// primero, necesitamos una funciones que separe entre TRAMAS S, C, P y Erroneas
-		//luego de eso ejecutamos
-
-
-
-
-		/*
-		errorCodes_t checkOk = BLOCK_OK;
-
-
-		if(buffer !=NULL) //No DEBERIA RECIBIR NULL,pero conviene validar
-		{
-			// Se controla formato, secuencia y CRC
-			checkOk = check_block(buffer);
-
-
-			if(checkOk == BLOCK_OK)
-			{
-				// Se envia el bloque a transmision
-				 // Solo se cambia formato si el contenido del block es valido. Se libera bloque en la funcion
-				change_format(buffer);
-			}
-			else    //ERROR EN EL MENSAJE
-			{
-				//inserto el mensaje de error correspondiente
-				insert_error_msg(buffer,checkOk);
-			}
-
-			//La funcion send_block siempre se llama
-			  send_block(buffer,driver);
-
-		}
-		 */
+		//este es de AO.c
+		event_dispacher(block);
 
 		gpioToggle(CHECK_LED);
 	}
