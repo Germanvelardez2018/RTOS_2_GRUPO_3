@@ -99,6 +99,12 @@ void led_task(void* params);
 
 void send_block(char* block,driver_t* driver);
 
+void  insert_error_msg(char* b, int8_t x);
+
+void add_crc_at_block(char* block);
+
+
+
 
 
 #endif /* RTOS2_REPOSITORIO_OFICIAL_REPOSITORIO_GIT_INC_DRIVER_H_ */

@@ -40,11 +40,6 @@
  * */
 
 
-static void  insert_error_msg(char* b, int8_t x);
-
-static void add_crc_at_block(char* block);
-
-
 
 
 
@@ -53,87 +48,76 @@ static void add_crc_at_block(char* block);
 
 
  void driver_task(void* params)
-{
+ {
 	char* block;
 	driver_t* driver = (driver_t*) params;
-	ao_base_t ao_snake = {.state = AO_OFF};
-	ao_base_t ao_camel = {.state = AO_OFF};
+	ao_base_t ao_snake = { .state = AO_OFF };
+	ao_base_t ao_camel = { .state = AO_OFF };
 
-	ao_base_t ao_pascal = {.state = AO_OFF};
+	ao_base_t ao_pascal = { .state = AO_OFF };
 
-	ao_base_t ao_error = {.state = AO_OFF};
+	ao_base_t ao_error = { .state = AO_OFF };
 
+	ao_base_t* active_objects[AO_SIZE] = { &ao_snake, &ao_camel, &ao_pascal,
+			&ao_error };
 
-
-	ao_base_t*  active_objects[AO_SIZE]={
-				&ao_snake,
-				&ao_camel,
-				&ao_pascal,
-				&ao_error
-	};
-
-	callback_ao_t  callbacks[AO_SIZE]={
-			set_snake,
-			set_camel,
-			set_pascal,
-			NULL
-
-	};
+	callback_ao_t callbacks[AO_SIZE] = { set_snake, set_camel, set_pascal,
+	NULL };
 
 	uint8_t index = 0;
 
-	while(1)
+	while (1)
 	{
 		gpioToggle(CHECK_LED);
 
 		/* Se recibiran los bloques de datos mediante queue onRxQueue (se considera capa 2 o 3)
 		 * Se espera a que venga un bloque por la cola*/
-		xQueueReceive( driver->onRxQueue,&block,portMAX_DELAY );
+		xQueueReceive(driver->onRxQueue, &block, portMAX_DELAY);
 
 		/*Se chequea el block, si da error se crea ao error*/
-			errorCodes_t checkOk = BLOCK_OK;
-			/*Se declara un objeto activo*/
+		errorCodes_t checkOk = BLOCK_OK;
+		/*Se declara un objeto activo*/
 
-			if(checkOk != BLOCK_OK)
+		if (checkOk != BLOCK_OK)
+		{
+			//creo el obj activo de error y le paso la callback de error
+			// 				insert_error_msg(buffer,checkOk);
+			printf("eeror\n");
+		}
+
+		/*Si el bloque es correcto se le da formato*/
+		else
+		{
+			char C = block[N_ELEMENTS];
+			/*Se define el objeto activo*/
+			switch (C)
 			{
-				//creo el obj activo de error y le paso la callback de error
-				// 				insert_error_msg(buffer,checkOk);
-				printf("eeror\n");
+			case FPASCAL:
+				index = AO_PASCAL;
+				break;
+			case FCAMEL:
+				index = AO_CAMEL;
+				break;
+			case FSNAKE:
+				index = AO_SNAKE;
+				break;
+			default:
+				break;
 			}
-
-			/*Si el bloque es correcto se le da formato*/
-			else
+			/*Se crea el objeto activo*/
+			if (active_objects[index]->state == AO_OFF)
 			{
-				char C = block[N_ELEMENTS];
-				/*Se define el objeto activo*/
-				switch(C)
+				bool res = create_ao(active_objects[index], driver,
+						callbacks[index], 0);
+				if (res != false)
 				{
-					case FPASCAL:
-						index = AO_PASCAL;
-						break;
-					case FCAMEL:
-						index = AO_CAMEL;
-						break;
-					case FSNAKE:
-						index = AO_SNAKE;
-						break;
-					default:
-						break;
-				}
-				/*Se crea el objeto activo*/
-				if(active_objects[index]->state ==AO_OFF)
-				{
-				 bool res =	create_ao(active_objects[index],driver,callbacks[index],0);
-				 if(res != false)
-				 {
-				 printf("no se creo el objeto\n");
+					printf("no se creo el objeto\n");
 
 				}
-				 post_AO(active_objects[index],block);
+				post_AO(active_objects[index], block);
 
 			}
-
-
+		}
 
 		gpioToggle(CHECK_LED);
 	}
@@ -217,18 +201,7 @@ void led_task(void* params)
 
 }
 
-
-
-
-
-
-/*================================Funciones privadas================================*/
-
-
-
-
-
-static void  insert_error_msg(char* b, int8_t x)
+void  insert_error_msg(char* b, int8_t x)
 {
 
 
@@ -238,7 +211,7 @@ static void  insert_error_msg(char* b, int8_t x)
 
 }
 
-static void add_crc_at_block(char* block)
+void add_crc_at_block(char* block)
 {
 	int8_t len = strlen(block);
 
@@ -251,6 +224,17 @@ static void add_crc_at_block(char* block)
 	block[len +1]=CRC[1];
 	block[len +2]= '\0';
 }
+
+
+
+
+/*================================Funciones privadas================================*/
+
+
+
+
+
+
 
  void send_block(char* block,driver_t* driver)
 
