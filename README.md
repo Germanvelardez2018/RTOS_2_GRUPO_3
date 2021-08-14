@@ -83,8 +83,27 @@ Se modifico lo siguiente:
 </ul>
 
 
-### Cuarta semana: Implementacion de objeto Activo.
+
+<h4 style="text-align:center;">
+    Grafico del sistema con implementacion de objetos activos
+</h4>
+=======================================================
+<figure style="float: center">
+  <img src="AO_DIAGRAMA.png" >
+  
+</figure>
+
+
+### Quinta semana: Implementacion de objeto Activo.
      
+     
+     Se modifico lo siguiente:
+<ul>
+	 <li> Se implemento 5 objetos activos, 3 de formato y 2 de errores</li>
+	 <li> Las tareas se crean y se destruyen de manera dinamica</li>
+	 <li> Se modifico el driver_task para transformarlo en el event_dispacher</li>
+	 <li> Se agrega diagrama del sistema con la implementacion de objetos activos</li>
+</ul>
  
 
 
