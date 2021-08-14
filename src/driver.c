@@ -15,7 +15,7 @@
 #include "error_msg.h"
 #include <string.h>
 
-
+#include "AO.h"
 
 
 
@@ -49,6 +49,49 @@ static void send_block(char* block,driver_t* driver);
 
 /*================================Funciones publicas==============================*/
 
+
+
+
+static void event_dispacher(ao_base_t* obj, char* block)
+{
+
+
+	//checkeo el block, si error se crea ao error
+	errorCodes_t checkOk = BLOCK_OK;
+	//declaro un obj activo
+	if(checkOk != BLOCK_OK)
+	{
+		//creo el obj activo de error y le paso la callback de error
+		// 				insert_error_msg(buffer,checkOk);
+
+	}
+
+	// si no error de formato
+	else
+	{
+			char C = block[4];
+		switch(C)
+		{
+		case FPASCAL:
+			//creo objeto activo pascal. Antes de la creacion debo enviarle el block a la queue del objeto activo
+			break;
+		case FCAMEL:
+			//creo objeto activo  camel
+			break;
+		case FSNAKE:
+			//creo objeto activo snake
+
+			break;
+		}
+
+
+	}
+
+
+
+
+}
+
  void driver_task(void* params)
 {
 	char* buffer;
@@ -61,6 +104,19 @@ static void send_block(char* block,driver_t* driver);
 		/* Se recibiran los bloques de datos mediante queue onRxQueue (se considera capa 2 o 3)
 		 * Se espera a que venga un bloque por la cola*/
 		xQueueReceive( driver->onRxQueue,&buffer,portMAX_DELAY );
+
+
+
+		//aqui empieza el dispacher y las modificaciones complejas
+
+
+		// primero, necesitamos una funciones que separe entre TRAMAS S, C, P y Erroneas
+		//luego de eso ejecutamos
+
+
+
+
+
 		errorCodes_t checkOk = BLOCK_OK;
 
 
