@@ -1,9 +1,10 @@
-/*
- * msg_format.c
+/*=============================================================================
+ * Authors: German Velardez <germanvelardez16@gmail.com>
+ *          Federico Meghinasso <fmeghi@gmail.com>
+ *          Matias Meghinasso <meghinasso@gmail.com>
+ * Date: 2021/07/09
  *
- *  Created on: 28 jul. 2021
- *      Author: gvelardez
- */
+ *===========================================================================*/
 
 #include "msg_format.h"
 #include <string.h>
@@ -16,46 +17,15 @@
  *
  * */
 
-static char detect_format(char *block, uint8_t pos_init, uint8_t pos_end);
+
+/*============================Declaracion de funciones privadas====================*/
 
 
 
-void change_format(char *block)
-{
 
-	char format = block[FORMAT_DESIGNATOR_POSITION]; // el byte que indica el formato que debe tener la salida
+/*================================Funciones publicas===============================*/
 
-	uint8_t pos_init = START_DATA_POSITION; //Posicion inicial del mensaje a cambiarle el formato
 
-	uint8_t pos_end = strlen(block) - CRC_SIZE; //Posicion final del mensaje a cambiarle el formato
-
-	switch (format)
-	{
-
-	case FPASCAL:
-		set_pascal(block);
-		break;
-	case FCAMEL:
-		set_camel(block);
-		break;
-	case FSNAKE:
-		set_snake(block);
-		break;
-
-	default:
-		//formato invalido de C
-		break;
-	}
-
-	//
-}
-
-/*Funciones privadas*/
-
-/*@param block: el bloque del mensaje.
- *
- *
- * */
 
  void set_pascal(char *block)
 {
@@ -147,49 +117,3 @@ void change_format(char *block)
  *  el ' _ ' es 95
  * */
 
-static bool isPascal(char *block, uint8_t pos_init)
-{
-
-	//si se cumple esta condiciones el primer elemento es mayuscula, entonces es pascalcase
-	bool res = (block[pos_init] <= 97) ? true : false;
-
-	return res;
-}
-
-static bool isSnake(char *block, uint8_t pos_init, uint8_t pos_end)
-{
-	for (uint8_t pos = pos_init; pos < pos_end; pos++)
-	{
-		if (block[pos] == '_')
-		{
-			return true;
-		}
-	}
-	return false;
-}
-/*
- * Detecta el formato del mensaje:
- *
- * return : FCAMEL     'C'
- * 			FPASCAL	   'P'
- * 			FSNAKE     'S'
- * */
-
-static char detect_format(char *block, uint8_t pos_init, uint8_t pos_end)
-{
-	char format = FCAMEL; //es CAMELCASE por descarte
-
-	if (isPascal(block, pos_init))
-	{
-		format = FPASCAL;
-	}
-	else
-	{
-		if (isSnake(block, pos_init, pos_end))
-		{
-			format = FSNAKE;
-		}
-	}
-
-	return format;
-}

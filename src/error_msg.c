@@ -1,15 +1,17 @@
-/*
- * ao_error.c
+/*=============================================================================
+ * Authors: German Velardez <germanvelardez16@gmail.com>
+ *          Federico Meghinasso <fmeghi@gmail.com>
+ *          Matias Meghinasso <meghinasso@gmail.com>
+ * Date: 2021/07/09
  *
- *  Created on: 14 ago. 2021
- *      Author: gvelardez
- */
+ *===========================================================================*/
 
 
 #include "error_msg.h"
+#include "crc8.h"
 
 
-
+/*===========================Funciones publicas==============================*/
 
 void  insert_error_msg_0(char* b)
 {

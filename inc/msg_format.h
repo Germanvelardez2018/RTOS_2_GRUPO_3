@@ -10,7 +10,7 @@
 #define RTOS2_REPOSITORIO_OFICIAL_REPOSITORIO_GIT_INC_MSG_FORMAT_H_
 
 
-
+/*==================================Declaracion Defines============================*/
 
 #define 	SOM						'('		//Start of message character
 #define 	EOM						')'		//End of message character
@@ -28,9 +28,9 @@
 #define	FCAMEL			'C'
 #define	FSNAKE			'S'
 
+/*==========================Declaracion de funciones publicas=====================*/
 
 
-void change_format(char* block);
 
 void set_pascal(char *block);
 
