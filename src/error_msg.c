@@ -18,7 +18,7 @@
 void insert_error(char* block,errorCodes_t type)
 {
 	block[OFFSET_MSG]='E';
-	int_to_ASCII(type, (block + OFFSET_MSG + 1));
+	int_to_ASCII((uint8_t)type, (block + OFFSET_MSG + 1));
 	block[OFFSET_MSG+3]='\0';
 
 }

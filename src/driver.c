@@ -94,9 +94,7 @@
 
 			create_error_ao(&ao_error,driver,insert_error,checkOk,0);
 
-			post_AO(ao_error.ao_base.queue, block);
-
-
+			post_AO(ao_error.ao_base, block);
 
 		}
 
