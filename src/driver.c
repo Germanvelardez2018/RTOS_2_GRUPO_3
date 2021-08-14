@@ -201,22 +201,6 @@ bool_t driver_init(driver_t* driver)
 
 }
 
-/*
- * Funcion testigo
- */
-
-void led_task(void* params)
-{
-
-	while(1)
-	{
-		gpioToggle(LED3);
-		vTaskDelay( 200 );
-
-	}
-
-}
-
 
 
 
