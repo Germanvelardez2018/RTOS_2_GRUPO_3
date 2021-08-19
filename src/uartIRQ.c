@@ -11,10 +11,11 @@
 #include "msg_format.h"
 
 
+/*==================================Declaracion Defines============================*/
 
-/*Este modulo se considera CAPA 1 */
 
-/*Se agregan estas funciones para mejorar legibilidad del codigo*/
+
+/*============================Declaracion de funciones privadas====================*/
 
 static void _init_block(driver_t* driver);
 
@@ -26,18 +27,18 @@ static void _add_newbyte_in_block(char new_byte, driver_t* driver);
 
 // Callback para la recepción
 static void _onRxCallback( void *param );
-// Callback para la recepción
+// Callback para la transmicion
 static void _onTxCallback( void *param );
 
 static void _processing_byte(char new_byte,driver_t* driver);
 
 
-
+/*================================Funciones publicas==============================*/
 
 
 bool_t txInterruptEnable( driver_t* driver )
 {
-	//printf("configura interrupccion tx\n");
+
 	switch (driver->uart )
 	    {
 	        case UART_GPIO:
@@ -61,7 +62,7 @@ bool_t txInterruptEnable( driver_t* driver )
 
 bool_t rxInterruptEnable( driver_t* driver)
 {
-	//printf("configura interuccion rx\n");
+
 
 	switch (driver->uart )
 	    {
@@ -105,18 +106,14 @@ void onTxTimeOutCallback( TimerHandle_t params)
 {
 	BaseType_t xHigherPriorityTaskWoken;
 	xHigherPriorityTaskWoken = pdFALSE;
-//	printf("\ntx timer\n");
+
 
 	// Obtenemos los datos de la UART seleccionada, aprovechando el campo reservado para el Timer ID.
 	driver_t* driver = ( driver_t* ) pvTimerGetTimerID( params );
 
 	//Inicio seccion critica
 	 taskENTER_CRITICAL();
-//	 uartTxWrite( selectedUart->uartValue,'\r' );
-	 //uartTxWrite( selectedUart->uartValue,'\n' );
 
-	 // Libero el bloque de memoria que ya fue trasmitido
-	 //QMPool_put( &(driver->memory.pool), driver->flow.txBlock );
 	 free_block (driver,NULL);
 
 	 driver->flow.tx_counter = 0; //Reinicio el contador de bytes transmitidos para la siguiente transmision
@@ -143,8 +140,6 @@ void onRxTimeOutCallback( TimerHandle_t params )
 
 	// Inicio seccion critica
    taskENTER_CRITICAL();
-//   printf("uart:%d\n",driver->uart);
-//   printf("buffer:%s\n",(driver->flow.rxBlock));
   //Verificar que tengamos un bloque de mensaje cerrado, en caso contrario descartar
 	//Tengo bloque cerrado y listo para enviar. Mandarlo por la queue
   if(driver->flow.state ==FLOW_CLOSE )
@@ -281,13 +276,13 @@ static void _processing_byte(char new_byte,driver_t* driver)
 
 		        case SOM:
 		        	/*Inicio de mensaje*/
-		        //	printf("init block\n");
+
 		        	_init_block(driver);
 		        	break;
 
 		        case EOM:
 		        	 /*Final de mensaje*/
-		       // 	printf("close block\n");
+
 		        	_close_block(driver);
 		        	break;
 

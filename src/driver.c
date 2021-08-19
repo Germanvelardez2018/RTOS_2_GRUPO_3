@@ -30,15 +30,105 @@
 
 /*============================Declaracion de funciones privadas====================*/
 
-
+ void c3_task(void* params);
 
 
 /*================================Funciones publicas==============================*/
 
 
 
- void driver_task(void* params)
- {
+
+bool_t driver_init(driver_t* driver)
+{
+
+	bool_t res=true;
+
+	/*Se inicializa el hardware del puerto UART con el baudrate seleccionado*/
+	uartConfig(driver->uart,driver->baudrate);
+
+	/*Se crean los timers que haran las funciones de time out de la transmicion y recepcion*/
+	driver->flow.onTxTimeOut = xTimerCreate( "TX Time Out", PROTOCOL_TIMEOUT,pdFALSE, ( void* ) driver,( void* ) onTxTimeOutCallback );
+
+	SIMPLE_ASSERT((driver->flow.onTxTimeOut));
+
+	driver->flow.onRxTimeOut  = xTimerCreate( "RX Time Out", PROTOCOL_TIMEOUT,pdFALSE,(void*)driver,onRxTimeOutCallback );
+
+	SIMPLE_ASSERT((driver->flow.onRxTimeOut));
+
+	/* Se crea la cola para se�alizar la recepcion de un dato valido hacia la aplicacion.*/
+	driver->onRxQueue = xQueueCreate( POOL_TOTAL_BLOCKS, sizeof( char* ) );
+
+	SIMPLE_ASSERT((driver->onRxQueue));
+
+	/* Se crea una cola donde van a ir los bloque que se tienen que mandar por UART
+	 * La cola va a tener tantos elementos como bloques de memoria pueda tener el pool*/
+	driver->onTxQueue = xQueueCreate( POOL_TOTAL_BLOCKS, sizeof( char* ) );
+
+	SIMPLE_ASSERT((driver->onTxQueue));
+
+	/* Se reserva memoria para el memory pool*/
+	driver->memory.p_memory_pool= ( char* ) pvPortMalloc( POOL_SIZE * sizeof( char ) );
+
+	SIMPLE_ASSERT((driver->memory.p_memory_pool));
+
+
+	/* Se inicializa el pool de memoria*/
+	QMPool_init(&(driver->memory.pool),(void*)driver->memory.p_memory_pool,POOL_SIZE* sizeof(char),BLOCK_SIZE);
+
+	driver-> flow.rxLen=0;
+	driver-> flow.txLen =0;
+	driver->flow.tx_counter=0;
+
+
+	/* Se pide el primer bloque de memoria*/
+	driver->flow.rxBlock = (char*) QMPool_get(&(driver->memory.pool),0);
+
+	/*Se activan las interrupciones*/
+	rxInterruptEnable( driver);
+
+	/* Se habilitan todas las interrupciones de la UART seleccionada*/
+	uartInterrupt( driver->uart, TRUE );
+
+	xTaskCreate(c3_task,				// Funcion de la tarea a ejecutar
+			(const char *) "modulo driver", 	// Nombre de la tarea como String amigable para el usuario
+			configMINIMAL_STACK_SIZE * 8,   // Cantidad de stack de la tarea
+			driver,                    	// Parametros de tarea
+			tskIDLE_PRIORITY + 0,           // Prioridad de la tarea
+			0);                         	// Puntero a la tarea creada en el sistema
+
+
+
+	return res;
+
+}
+
+/*
+ * Controlar donde iria esta funcion
+ * */
+
+
+void add_crc_at_block(char* block)
+{
+	int8_t len = strlen(block);
+
+	int8_t crc = crc8_calc(0,block,len);
+	char CRC[2];
+	int_to_ASCII(crc ,CRC);
+	//agrego el crc
+
+	block[len ]=CRC[0];
+	block[len +1]=CRC[1];
+	block[len +2]= '\0';
+}
+
+
+
+
+/*================================Funciones privadas================================*/
+
+
+void c3_task(void* params)
+{
 
 	driver_t* driver = (driver_t*) params;
 
@@ -132,106 +222,6 @@
 		gpioToggle(CHECK_LED);
 	}
 }
-
-
-
-
-
-bool_t driver_init(driver_t* driver)
-{
-
-	bool_t res=true;
-
-	/*Se inicializa el hardware del puerto UART con el baudrate seleccionado*/
-	uartConfig(driver->uart,driver->baudrate);
-
-	/*Se crean los timers que haran las funciones de time out de la transmicion y recepcion*/
-	driver->flow.onTxTimeOut = xTimerCreate( "TX Time Out", PROTOCOL_TIMEOUT,pdFALSE, ( void* ) driver,( void* ) onTxTimeOutCallback );
-
-	SIMPLE_ASSERT((driver->flow.onTxTimeOut));
-
-	driver->flow.onRxTimeOut  = xTimerCreate( "RX Time Out", PROTOCOL_TIMEOUT,pdFALSE,(void*)driver,onRxTimeOutCallback );
-
-	SIMPLE_ASSERT((driver->flow.onRxTimeOut));
-
-	/* Se pide un bloque del pool
-	 * REVISAR: pide un bloque pero nunca se creo el pool???
-	 * */
-	//driver->flow.rxBlock = ( char* ) QMPool_get( &driver->memory.pool,0 );
-
-	/* Se crea la cola para se�alizar la recepcion de un dato valido hacia la aplicacion.*/
-	driver->onRxQueue = xQueueCreate( POOL_TOTAL_BLOCKS, sizeof( char* ) );
-
-	SIMPLE_ASSERT((driver->onRxQueue));
-
-	/* Se crea una cola donde van a ir los bloque que se tienen que mandar por UART
-	 * La cola va a tener tantos elementos como bloques de memoria pueda tener el pool*/
-	driver->onTxQueue = xQueueCreate( POOL_TOTAL_BLOCKS, sizeof( char* ) );
-
-	SIMPLE_ASSERT((driver->onTxQueue));
-
-	/* Se reserva memoria para el memory pool*/
-	driver->memory.p_memory_pool= ( char* ) pvPortMalloc( POOL_SIZE * sizeof( char ) );
-
-	SIMPLE_ASSERT((driver->memory.p_memory_pool));
-
-
-	/* Se inicializa el pool de memoria*/
-	QMPool_init(&(driver->memory.pool),(void*)driver->memory.p_memory_pool,POOL_SIZE* sizeof(char),BLOCK_SIZE);
-
-	driver-> flow.rxLen=0;
-	driver-> flow.txLen =0;
-	driver->flow.tx_counter=0;
-
-
-	/* Se pide el primer bloque de memoria*/
-	driver->flow.rxBlock = (char*) QMPool_get(&(driver->memory.pool),0);
-
-	/*Se activan las interrupciones*/
-	rxInterruptEnable( driver);
-
-	/* Se habilitan todas las interrupciones de la UART seleccionada*/
-	uartInterrupt( driver->uart, TRUE );
-
-	xTaskCreate(driver_task,				// Funcion de la tarea a ejecutar
-			(const char *) "modulo driver", 	// Nombre de la tarea como String amigable para el usuario
-			configMINIMAL_STACK_SIZE * 8,   // Cantidad de stack de la tarea
-			driver,                    	// Parametros de tarea
-			tskIDLE_PRIORITY + 0,           // Prioridad de la tarea
-			0);                         	// Puntero a la tarea creada en el sistema
-
-
-
-	return res;
-
-}
-
-
-
-
-void add_crc_at_block(char* block)
-{
-	int8_t len = strlen(block);
-
-	int8_t crc = crc8_calc(0,block,len);
-	char CRC[2];
-	int_to_ASCII(crc ,CRC);
-	//agrego el crc
-
-	block[len ]=CRC[0];
-	block[len +1]=CRC[1];
-	block[len +2]= '\0';
-}
-
-
-
-
-/*================================Funciones privadas================================*/
-
-
-
-
-
 
 
  void send_block(char* block,driver_t* driver)
