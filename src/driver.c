@@ -154,8 +154,10 @@ bool_t driver_init(driver_t* driver)
 
 	SIMPLE_ASSERT((driver->flow.onRxTimeOut));
 
-	/* Se pide un bloque del pool*/
-	driver->flow.rxBlock = ( char* ) QMPool_get( &driver->memory.pool,0 );
+	/* Se pide un bloque del pool
+	 * REVISAR: pide un bloque pero nunca se creo el pool???
+	 * */
+	//driver->flow.rxBlock = ( char* ) QMPool_get( &driver->memory.pool,0 );
 
 	/* Se crea la cola para se�alizar la recepcion de un dato valido hacia la aplicacion.*/
 	driver->onRxQueue = xQueueCreate( POOL_TOTAL_BLOCKS, sizeof( char* ) );
@@ -190,6 +192,15 @@ bool_t driver_init(driver_t* driver)
 
 	/* Se habilitan todas las interrupciones de la UART seleccionada*/
 	uartInterrupt( driver->uart, TRUE );
+
+	xTaskCreate(driver_task,				// Funcion de la tarea a ejecutar
+			(const char *) "modulo driver", 	// Nombre de la tarea como String amigable para el usuario
+			configMINIMAL_STACK_SIZE * 8,   // Cantidad de stack de la tarea
+			driver,                    	// Parametros de tarea
+			tskIDLE_PRIORITY + 0,           // Prioridad de la tarea
+			0);                         	// Puntero a la tarea creada en el sistema
+
+
 
 	return res;
 

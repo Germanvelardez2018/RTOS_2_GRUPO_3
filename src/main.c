@@ -37,12 +37,6 @@ int main(void)
 	driver_init(&driver);
 
 
-	xTaskCreate(driver_task,				// Funcion de la tarea a ejecutar
-			(const char *) "modulo driver", 	// Nombre de la tarea como String amigable para el usuario
-			configMINIMAL_STACK_SIZE * 8,   // Cantidad de stack de la tarea
-			&driver,                    	// Parametros de tarea
-			tskIDLE_PRIORITY + 0,           // Prioridad de la tarea
-			0);                         	// Puntero a la tarea creada en el sistema
 
 
 
