@@ -26,10 +26,9 @@
 /*================================Funciones publicas===============================*/
 
 
-
  void set_pascal(char *block)
 {
-	uint8_t pos_end = strlen(block) - CRC_SIZE; //Posicion final del mensaje a cambiarle el formato
+	uint8_t pos_end = strlen(block); //Posicion final del mensaje a cambiarle el formato
 	uint8_t pos_read = START_DATA_POSITION;  //Posicion de lectura
 	uint8_t pos_write = START_DATA_POSITION; //Posicion de escritura
 
@@ -55,7 +54,7 @@
 
  void set_camel(char *block)
 {
-	uint8_t pos_end = strlen(block) - CRC_SIZE; //Posicion final del mensaje a cambiarle el formato
+	uint8_t pos_end = strlen(block); //Posicion final del mensaje a cambiarle el formato
 	uint8_t pos_read = START_DATA_POSITION;  //Posicion de lectura
 	uint8_t pos_write = START_DATA_POSITION; //Posicion de escritura
 
@@ -82,7 +81,7 @@
  void set_snake(char *block)
 {
 	char aux_block[FRAME_MAX_SIZE];
-	uint8_t pos_end = strlen(block) - CRC_SIZE; //Posicion final del mensaje a cambiarle el formato
+	uint8_t pos_end = strlen(block); //Posicion final del mensaje a cambiarle el formato
 	uint8_t pos_read = START_DATA_POSITION;  //Posicion de lectura
 	uint8_t pos_write = START_DATA_POSITION; //Posicion de escritura
 
@@ -108,12 +107,4 @@
 	}
 	block[pos_write] = '\0'; //Se cierra el nuevo string
 }
-/* si todos los caracteres del mensaje son minusculas o '_', entonces el mensaje es snake_case
- * si el primer caracter del mensaje es Mayuscula, entonces es PascalCase
- * por descarte si no es PascalCase y no es snake_case, entonces es camelCase
- *
- *  A = 65        a = 97
- *  B = 66		  b = 98  y sigue
- *  el ' _ ' es 95
- * */
 

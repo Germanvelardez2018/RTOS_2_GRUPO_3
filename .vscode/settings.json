@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "uartirq.h": "c",
+        "ao.h": "c"
+    }
+}
