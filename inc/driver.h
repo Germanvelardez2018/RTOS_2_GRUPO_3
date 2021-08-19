@@ -53,11 +53,6 @@ typedef enum
 
 
 
-typedef struct {
-
-}block_tx_words;
-
-
 typedef struct
 {
 	  state_flow state;				//Estado del buffer

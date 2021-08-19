@@ -27,18 +27,12 @@
 
 
 
-#define FORMAT_CC		'C'
-#define	FORMAT_P		'P'
-#define FORMAT_S		'S'
-
-
-
 /*================================Funciones publicas==============================*/
 
-/*Block es todo el bloque, secuencias! C ! mensaje ! CRC*/
 
 errorCodes_t check_block(char* block);
 
+bool check_CRC(char* block);
 
 
 

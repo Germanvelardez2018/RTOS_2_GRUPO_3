@@ -30,8 +30,6 @@
 
 static bool check_secuence(char* block);
 
-static bool check_CRC(char* block);
-
 static bool check_msg(char* block);
 
 static bool check_opcode(char* block);
@@ -47,10 +45,10 @@ errorCodes_t check_block(char* block)
 		return ERROR_INVALID_DATA;//ERROR_SECUENCE;
 	}
 
-	if(!check_CRC(block))
+/*	if(!check_CRC(block))
 	{
 		return ERROR_INVALID_DATA ;//ERROR_CRC
-	}
+	}*/
 
    if(!check_msg( block))
     {
@@ -65,6 +63,31 @@ errorCodes_t check_block(char* block)
  return	BLOCK_OK;
 }
 
+bool check_CRC(char* block)
+{
+	bool res = true;
+	int8_t size = strlen(block)  ;
+
+	/*Se extrae el crc del mensaje y se pasa a un entero*/
+	char CRC[2];
+	CRC[0]=block[size-2];
+	CRC[1] = block [size -1];
+
+
+
+	int crcMensaje = 0;
+	crcMensaje = ASCII_to_int(CRC);
+	/*Se calcula el crc*/
+	uint8_t crcCalculado = crc8_calc(0,block,size-2);
+
+	if( crcMensaje != crcCalculado)
+	{
+		res = false;
+	}
+
+	return res;
+
+}
 
 /*================================Funciones privadas================================*/
 
@@ -102,31 +125,7 @@ static bool check_secuence(char* block)
 
 
 
-static bool check_CRC(char* block)
-{
-	bool res = true;
-	int8_t size = strlen(block)  ;
 
-	/*Se extrae el crc del mensaje y se pasa a un entero*/
-	char CRC[2];
-	CRC[0]=block[size-2];
-	CRC[1] = block [size -1];
-
-
-
-	int crcMensaje = 0;
-	crcMensaje = ASCII_to_int(CRC);
-	/*Se calcula el crc*/
-	uint8_t crcCalculado = crc8_calc(0,block,size-2);
-
-	if( crcMensaje != crcCalculado)
-	{
-		res = false;
-	}
-
-	return res;
-
-}
 
 static bool check_msg(char* block)
 {

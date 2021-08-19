@@ -5,11 +5,12 @@
  * Date: 2021/07/09
  *
  *===========================================================================*/
-#include <string.h>
+
 #include "uartIRQ.h"
-
+#include "check_functions.h"
 #include "msg_format.h"
-
+#include "AO.h"
+#include <string.h>
 
 /*==================================Declaracion Defines============================*/
 
@@ -17,13 +18,10 @@
 
 /*============================Declaracion de funciones privadas====================*/
 
-static void _init_block(driver_t* driver);
+
 
 static void _discard_block(driver_t* driver);
 
-static void _close_block(driver_t* driver);
-
-static void _add_newbyte_in_block(char new_byte, driver_t* driver);
 
 // Callback para la recepción
 static void _onRxCallback( void *param );
@@ -102,6 +100,8 @@ void free_block (driver_t* driver, char*block)
 
 }
 
+
+
 void onTxTimeOutCallback( TimerHandle_t params)
 {
 	BaseType_t xHigherPriorityTaskWoken;
@@ -134,7 +134,7 @@ void onTxTimeOutCallback( TimerHandle_t params)
 
 void onRxTimeOutCallback( TimerHandle_t params )
 {
-	//printf("in timeout rx\n");
+
 
 	driver_t* driver =  (driver_t*)pvTimerGetTimerID( params);
 
@@ -208,7 +208,7 @@ static void _onRxCallback( void *param )
 
 	 taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
 
-	 //Hago la evaluacion de cambio de cambio de contexto necesario.
+	 //Hago la evaluacion de cambio de contexto necesario.
 	     if ( xTaskWokenByReceive != pdFALSE )
 	     {
 	         taskYIELD ();
@@ -216,7 +216,7 @@ static void _onRxCallback( void *param )
 
 
 }
-// Callback para la recepción
+// Callback para la transmicion
  void _onTxCallback( void *param )
 {
 
@@ -276,21 +276,32 @@ static void _processing_byte(char new_byte,driver_t* driver)
 
 		        case SOM:
 		        	/*Inicio de mensaje*/
-
-		        	_init_block(driver);
+		        	driver->flow.rxLen =0;
+		            driver->flow.state = FLOW_INIT;
 		        	break;
 
 		        case EOM:
 		        	 /*Final de mensaje*/
+		        	// para finalizar un mensaje necesito agregar caracter 0\ al final
+		        	driver->flow.rxBlock[driver->flow.rxLen] = '\0';
 
-		        	_close_block(driver);
+		        	/*Se chequea el crc del bloque*/
+		        	if(check_CRC(driver->flow.rxBlock))
+		        	{
+		        		driver->flow.state= FLOW_CLOSE;
+		        	}else
+		        	{
+		        		 _discard_block(driver);
+		        	}
+
 		        	break;
 
 		        default:
 		        {
 		        	/*Se agregan bytes al mensaje*/
-
-		        	_add_newbyte_in_block(new_byte,driver);
+		        	driver->flow.rxBlock[driver->flow.rxLen] = new_byte;
+		        	//aumento el rxLen
+		        	(driver->flow.rxLen) =  (driver->flow.rxLen) + 1;
 
 		        }
 		    }
@@ -299,43 +310,16 @@ static void _processing_byte(char new_byte,driver_t* driver)
 
 
 
-static void _init_block(driver_t* driver)
-{
-	//reinicio contadores
-	driver->flow.rxLen =0;
-    driver->flow.state = FLOW_INIT;
-}
 
-
-
-static void _close_block(driver_t* driver)
-{
-	// para finalizar un mensaje necesito agregar caracter 0\ al final
-	driver->flow.rxBlock[driver->flow.rxLen] = '\0';
-
-    driver->flow.state= FLOW_CLOSE;
-
-
-}
-
-
-static void _add_newbyte_in_block(char new_byte, driver_t* driver)
-{
-	//Se recibio un SOM?
-	 if(driver->flow.state == FLOW_INIT)
-	{
-	  //Es un caracter valido?
-	  //guardo el caracter nuevo
-	  driver->flow.rxBlock[driver->flow.rxLen] = new_byte;
-	  //aumento el rxLen
-	  (driver->flow.rxLen) =  (driver->flow.rxLen) + 1;
-     }
-	 //si no hubo SOM, ignorar
-}
 
 static void _discard_block(driver_t* driver)
 {
+	ao_error_t  ao_error = {.ao_base.state = AO_OFF};
 	driver->flow.state = FLOW_NOT_INIT;
 	driver->flow.rxLen =0;
+	create_error_ao(&ao_error,driver,insert_error,ERROR_INVALID_DATA,0);
+
+	post_AO(&(ao_error.ao_base), driver->flow.rxBlock);
+
 }
 
