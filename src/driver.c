@@ -25,10 +25,15 @@
 /*============================Declaracion de funciones privadas====================*/
 
 void c3_task(void *params);
+
 void init_timers(driver_t *driver);
+
 void init_queues(driver_t *driver);
+
 void init_memory(driver_t *driver);
+
 void init_uart(driver_t *driver);
+
 void init_c3_task(driver_t *driver);
 
 /*================================Funciones publicas==============================*/
@@ -56,7 +61,7 @@ void add_crc_at_block(char *block)
 	int8_t len = strlen(block);
 
 	int8_t crc = crc8_calc(0, block, len);
-	char CRC[2];
+	char CRC[CRC_SIZE];
 	int_to_ASCII(crc, CRC);
 	//agrego el crc
 
@@ -91,7 +96,6 @@ void c3_task(void *params)
 			set_snake,
 			set_camel,
 			set_pascal,
-
 		};
 
 	char *block;
@@ -99,7 +103,7 @@ void c3_task(void *params)
 
 	while (TRUE)
 	{
-		gpioToggle(CHECK_LED);
+		gpioToggle(CHECK_LED);		//Led de control.
 
 		/* Se recibiran los bloques de datos mediante queue onRxQueue (se considera capa 2 o 3)
 		 * Se espera a que venga un bloque por la cola*/
