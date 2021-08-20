@@ -46,7 +46,7 @@ bool_t create_ao(ao_base_t *obj, driver_t *driver, callback_ao_t action, uint8_t
 	{
 		//se asigna callback
 		obj->action = action;
-		retValue = xTaskCreate(event_handler, (const char *)"AO generico", configMINIMAL_STACK_SIZE * 8, obj, tskIDLE_PRIORITY + priorty, NULL);
+		retValue = xTaskCreate(event_handler, (const char *)"AO generico", configMINIMAL_STACK_SIZE * 8, obj, tskIDLE_PRIORITY + priorty, &(obj->task));
 	}
 
 	if (retValue != pdFALSE)
@@ -72,7 +72,7 @@ bool_t create_error_ao(ao_error_t *error, driver_t *driver, error_callback_t act
 	{
 		//se asigna callback
 		error->e_callback = action;
-		retValue = xTaskCreate(error_event_handler, (const char *)"AO error", configMINIMAL_STACK_SIZE * 8, error, tskIDLE_PRIORITY + priorty, NULL);
+		retValue = xTaskCreate(error_event_handler, (const char *)"AO error", configMINIMAL_STACK_SIZE * 8, error, tskIDLE_PRIORITY + priorty, &(error->ao_base.task));
 	}
 
 	if (retValue != pdFALSE)

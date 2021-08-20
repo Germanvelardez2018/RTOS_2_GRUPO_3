@@ -35,6 +35,7 @@ typedef struct
 	callback_ao_t action; //callback
 	AO_state state;
 	driver_t *driver; //NECESARIO PARA conectarse con UART
+	TaskHandle_t* task; // Puntero para referenciar la tarea asociada al objeto activo
 } ao_base_t;
 
 typedef struct
