@@ -25,8 +25,6 @@
 
 #define CHECK_LED 		LED1
 #define AO_SIZE			3
-#define N_ELEMENTS		5
-#define C_POS			4
 
 /*============================Declaracion de funciones privadas====================*/
 
@@ -180,7 +178,7 @@ void c3_task(void* params)
 		{
 
 
-			char C = block[C_POS];
+			char C = block[FORMAT_DESIGNATOR_POSITION];
 			/*Se define el objeto activo*/
 			switch (C)
 			{
