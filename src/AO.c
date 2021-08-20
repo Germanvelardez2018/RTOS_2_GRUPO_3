@@ -14,83 +14,66 @@
 
 /*============================Declaracion de funciones privadas====================*/
 
-static void event_handler(void* obj);
+static void event_handler(void *obj);
 
-
-
-
-static void error_event_handler(void* obj);
-
-
+static void error_event_handler(void *obj);
 
 /*================================Funciones publicas==============================*/
 
-
-
- void post_AO(ao_base_t* obj, char*  block)
+void post_AO(ao_base_t *obj, char *block)
 
 {
-	xQueueSend(obj->queue,&block,1);
+	xQueueSend(obj->queue, &block, 1);
 }
 
-
-
-
-
-
-
-bool_t create_ao(ao_base_t* obj, driver_t* driver, callback_ao_t action,uint8_t priorty)
+bool_t create_ao(ao_base_t *obj, driver_t *driver, callback_ao_t action, uint8_t priorty)
 {
 	BaseType_t retValue = pdFALSE;
-	obj->queue = xQueueCreate(N_QUEUE_AO, sizeof(char*));
+
+	if (obj->state == AO_ON)
+	{
+		return retValue;
+	}
+
+	obj->queue = xQueueCreate(N_QUEUE_AO, sizeof(char *));
 
 	obj->driver = driver;
 
-	//el handler es generico para todos los objetos de este estilo
-	if(obj->queue != NULL)
+	//Se crea la tarea asociada al objeto y se asigna su callback.
+	if (obj->queue != NULL)
 	{
 		//se asigna callback
 		obj->action = action;
-		retValue = xTaskCreate(event_handler,(const char*)"AO generico", configMINIMAL_STACK_SIZE*8, obj, tskIDLE_PRIORITY+priorty, NULL);
-
-
+		retValue = xTaskCreate(event_handler, (const char *)"AO generico", configMINIMAL_STACK_SIZE * 8, obj, tskIDLE_PRIORITY + priorty, NULL);
 	}
 
-	if(retValue != pdFALSE)
+	if (retValue != pdFALSE)
 	{
 		obj->state = AO_ON;
-		return TRUE;
+		return retValue;
 	}
 	else
 	{
-		return FALSE;
+		return retValue;
 	}
-
 }
 
-
-
-
-
-
-bool_t create_error_ao(ao_error_t* error, driver_t* driver, error_callback_t action,errorCodes_t error_type,uint8_t priorty)
+bool_t create_error_ao(ao_error_t *error, driver_t *driver, error_callback_t action, errorCodes_t error_type, uint8_t priorty)
 {
 	BaseType_t retValue = pdFALSE;
-	error->ao_base.queue = xQueueCreate(N_QUEUE_AO, sizeof(char*));
-	error->type_error= error_type;
+	error->ao_base.queue = xQueueCreate(N_QUEUE_AO, sizeof(char *));
+	error->type_error = error_type;
 	error->ao_base.driver = driver;
 
 	//el handler es generico para todos los objetos de este estilo
-	if(error->ao_base.queue != NULL)
+	if (error->ao_base.queue != NULL)
 	{
 		//se asigna callback
 		error->e_callback = action;
-		retValue = xTaskCreate(error_event_handler,(const char*)"AO error", configMINIMAL_STACK_SIZE*8, error, tskIDLE_PRIORITY+priorty, NULL);
-
-
+		retValue = xTaskCreate(error_event_handler, (const char *)"AO error", configMINIMAL_STACK_SIZE * 8, error, tskIDLE_PRIORITY + priorty, NULL);
 	}
 
-	if(retValue != pdFALSE)
+	if (retValue != pdFALSE)
 	{
 		error->ao_base.state = AO_ON;
 		return TRUE;
@@ -99,96 +82,59 @@ bool_t create_error_ao(ao_error_t* error, driver_t* driver, error_callback_t act
 	{
 		return FALSE;
 	}
-
 }
 
-
-
-
 /*================================Funciones privadas================================*/
-
 
 /*
  * event handler generico para todos los objetos activos definidos en este modulo
  * */
 
-static void event_handler(void* obj)
+static void event_handler(void *obj)
 {
+	ao_base_t *ao = (ao_base_t *)obj;
 
-	BaseType_t retQueue;
-
-	ao_base_t* ao = (ao_base_t*) obj;
-
-
-	while(1)
+	while (1)
 	{
-		if(uxQueueMessagesWaiting(ao->queue))
+		if (xQueueReceive(ao->queue, &(ao->message), 0))
 		{
-			retQueue = xQueueReceive(ao->queue,&(ao->message),0) ;// Evitar bloqueos
-
-			if(retQueue) //lectura exitosa, entonces llamo callback
-			{
-				(*ao->action)((ao->message));
-				send_block((ao->message),ao->driver);
-			}
+			(*ao->action)((ao->message));
+			send_block((ao->message), ao->driver);
 		}
 		else
 		{
-
 			ao->state = AO_OFF;
-			vQueueDelete(ao->queue);
+			vQueueDelete(ao->queue);			//En caso de no tener mas mensajes en la cola, el objeto se suicida.
 			vTaskDelete(NULL);
 		}
-
 	}
-
 }
 
-
-
-
-
-
-static void error_event_handler(void* obj)
+static void error_event_handler(void *obj)
 {
 
 	BaseType_t retQueue;
 
-	ao_error_t* error = (ao_error_t*) obj;
+	ao_error_t *error = (ao_error_t *)obj;
 
-
-	while(1)
+	while (1)
 	{
-		if(uxQueueMessagesWaiting(error->ao_base.queue))
+		if (uxQueueMessagesWaiting(error->ao_base.queue))
 		{
-			retQueue = xQueueReceive(error->ao_base.queue,&(error->ao_base.message),0) ;// Evitar bloqueos
+			retQueue = xQueueReceive(error->ao_base.queue, &(error->ao_base.message), 0); // Evitar bloqueos
 
-			if(retQueue) //lectura exitosa, entonces llamo callback
+			if (retQueue) //lectura exitosa, entonces llamo callback
 			{
-				(error->e_callback)((error->ao_base.message),error->type_error);
-				send_block((error->ao_base.message),error->ao_base.driver);
+				(error->e_callback)((error->ao_base.message), error->type_error);
+				send_block((error->ao_base.message), error->ao_base.driver);
 			}
 		}
 		else
 		{
 
-		error->ao_base.state = AO_OFF;
+			error->ao_base.state = AO_OFF;
 			vQueueDelete(error->ao_base.queue);
 			vTaskDelete(NULL);
 		}
-
 	}
-
 }
-
-
-
-
-
-
-
-
-
-
-
-

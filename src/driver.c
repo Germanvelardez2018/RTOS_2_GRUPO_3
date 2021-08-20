@@ -144,11 +144,8 @@ void c3_task(void *params)
 				break;
 			}
 			/*Se crea el objeto activo*/
-			if (active_objects[index]->state == AO_OFF)
+			if (create_ao(active_objects[index], driver, callbacks[index], 0))
 			{
-
-				create_ao(active_objects[index], driver, callbacks[index], 0);
-
 				post_AO(active_objects[index], block);
 			}
 		}
