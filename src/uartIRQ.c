@@ -33,6 +33,8 @@ static void _processing_byte(char new_byte, driver_t *driver);
 
 void add_crc_at_block(char *block);
 
+void send_block_from_ISR(char *block, driver_t *driver);
+
 /*================================Funciones publicas==============================*/
 
 bool_t txInterruptEnable(driver_t *driver)
@@ -286,7 +288,9 @@ static void _processing_byte(char new_byte, driver_t *driver)
 		}
 		else
 		{
-			_discard_block(driver);
+			//_discard_block(driver);
+			insert_error(driver->flow.rxBlock, ERROR_INVALID_DATA);
+			send_block_from_ISR(driver->flow.rxBlock, driver);
 		}
 
 		break;
@@ -324,4 +328,24 @@ void add_crc_at_block(char *block)
 	block[len] = CRC[0];
 	block[len + 1] = CRC[1];
 	block[len + 2] = '\0';
+}
+
+void send_block_from_ISR(char *block, driver_t *driver)
+
+{
+	BaseType_t xTaskWokenByReceive = pdFALSE;
+	UBaseType_t uxSavedInterruptStatus;
+	/*Antes de enviar el mensaje calcular CRC y agregarlo*/
+	add_crc_at_block(block);
+	/* Se envia a la cola de transmision el block a transmitir*/
+	xQueueSendFromISR(driver->onTxQueue, &block, &xTaskWokenByReceive);
+	/* No se permite que se modifique txcounter*/
+	uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
+	/* Si se esta enviando algo no se llama a la interrupcion para no interrumpir el delay*/
+	if (driver->flow.tx_counter == 0) //
+	{
+		txInterruptEnable(driver);
+	}
+	taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus);
+	uartSetPendingInterrupt(driver->uart);
 }
