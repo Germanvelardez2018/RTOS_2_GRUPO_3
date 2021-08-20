@@ -27,8 +27,7 @@ int main(void)
 
 	/*Iniciamos el modulo protocol*/
 
-	static driver_t driver = {.uart = UART_USB,
-							  .baudrate = UART_BAUDRATE};
+	static driver_t driver = {.uart = UART_USB, .baudrate = UART_BAUDRATE};
 
 	driver_init(&driver);
 
