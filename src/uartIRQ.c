@@ -125,7 +125,6 @@ void onRxTimeOutCallback(TimerHandle_t params)
 	//Tengo bloque cerrado y listo para enviar. Mandarlo por la queue
 	if (driver->flow.state == FLOW_CLOSE)
 	{
-		//	printf("envio  buffer\n");
 
 		xQueueSend(driver->onRxQueue, (void *)&(driver->flow.rxBlock), 0);
 		driver->flow.state = FLOW_NOT_INIT;
@@ -246,13 +245,14 @@ static void _processing_byte(char new_byte, driver_t *driver)
 
 	case EOM:
 		/*Final de mensaje*/
-		// para finalizar un mensaje necesito agregar caracter 0\ al final
+
 		driver->flow.rxBlock[driver->flow.rxLen] = '\0';
 
 		/*Se chequea el crc del bloque*/
 		if (check_CRC(driver->flow.rxBlock))
 		{
 			driver->flow.state = FLOW_CLOSE;
+			driver->flow.rxBlock[driver->flow.rxLen - CRC_SIZE] = '\0';
 		}
 		else
 		{

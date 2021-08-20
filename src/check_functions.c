@@ -135,13 +135,13 @@ static bool check_msg(char* block)
 	uint8_t i;
 
 
-	if(length <= (SEC_LENGTH + OPCODE_LENGTH + CRC_LENGTH))
+	if(length <= (SEC_LENGTH + OPCODE_LENGTH))
 	{
 		return FALSE;
 	}
 
 
-	for (i=(OPCODE_POS + 1); i < (length - CRC_LENGTH); i++)
+	for (i=(OPCODE_POS + 1); i < (length); i++)
 	{
 		if (islower(block[i]))
 		{

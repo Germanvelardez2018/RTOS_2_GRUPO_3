@@ -23,7 +23,7 @@
 
 /*==================================Declaracion Defines============================*/
 
-#define CHECK_LED 	LED1
+#define CHECK_LED 		LED1
 #define AO_SIZE			3
 #define N_ELEMENTS		5
 #define C_POS			4
