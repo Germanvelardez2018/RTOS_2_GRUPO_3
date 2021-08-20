@@ -22,6 +22,8 @@ bool_t rxInterruptEnable( driver_t* );
 void onTxTimeOutCallback( TimerHandle_t );
 void onRxTimeOutCallback( TimerHandle_t );
 
+void send_block(char *block, driver_t *driver);
+
 
 void free_block (driver_t* driver,char* block);
 

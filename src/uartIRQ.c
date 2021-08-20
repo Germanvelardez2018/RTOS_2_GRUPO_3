@@ -11,8 +11,14 @@
 #include "msg_format.h"
 #include "AO.h"
 #include <string.h>
+#include "crc8.h"
+#include "error_msg.h"
 
 /*==================================Declaracion Defines============================*/
+
+/*==================================Variables Globales=============================*/
+
+
 
 /*============================Declaracion de funciones privadas====================*/
 
@@ -24,6 +30,8 @@ static void _onRxCallback(void *param);
 static void _onTxCallback(void *param);
 
 static void _processing_byte(char new_byte, driver_t *driver);
+
+void add_crc_at_block(char *block);
 
 /*================================Funciones publicas==============================*/
 
@@ -146,6 +154,28 @@ void onRxTimeOutCallback(TimerHandle_t params)
 	taskEXIT_CRITICAL();
 }
 
+
+void send_block(char *block, driver_t *driver)
+
+{
+	/*Antes de enviar el mensaje calcular CRC y agregarlo*/
+	add_crc_at_block(block);
+	/* Se envia a la cola de transmision el block a transmitir*/
+	xQueueSend(driver->onTxQueue, &block, portMAX_DELAY);
+	/* No se permite que se modifique txcounter*/
+	taskENTER_CRITICAL();
+	/* Si se esta enviando algo no se llama a la interrupcion para no interrumpir el delay*/
+	if (driver->flow.tx_counter == 0) //
+	{
+		txInterruptEnable(driver);
+	}
+	taskEXIT_CRITICAL();
+	uartSetPendingInterrupt(driver->uart);
+}
+
+
+
+
 /*Funciones privadas*/
 
 // Callback para la recepción
@@ -164,7 +194,6 @@ static void _onRxCallback(void *param)
 	{
 		// Obtenemos el byte de la UART seleccionada
 		char new_byte = uartRxRead(driver->uart);
-		//	printf("[isr]%c\n",new_byte);
 		_processing_byte(new_byte, (driver_t *)driver);
 	}
 	else
@@ -248,6 +277,7 @@ static void _processing_byte(char new_byte, driver_t *driver)
 
 		driver->flow.rxBlock[driver->flow.rxLen] = '\0';
 
+
 		/*Se chequea el crc del bloque*/
 		if (check_CRC(driver->flow.rxBlock))
 		{
@@ -262,21 +292,36 @@ static void _processing_byte(char new_byte, driver_t *driver)
 		break;
 
 	default:
-	{
-		/*Se agregan bytes al mensaje*/
-		driver->flow.rxBlock[driver->flow.rxLen] = new_byte;
-		//aumento el rxLen
-		(driver->flow.rxLen) = (driver->flow.rxLen) + 1;
-	}
+		{
+			if (driver->flow.state == FLOW_INIT)
+			{
+				/*Se agregan bytes al mensaje*/
+				driver->flow.rxBlock[driver->flow.rxLen] = new_byte;
+				(driver->flow.rxLen) = (driver->flow.rxLen) + 1;
+			}
+
+		}
 	}
 }
 
 static void _discard_block(driver_t *driver)
 {
-	ao_error_t ao_error = {.ao_base.state = AO_OFF};
+
 	driver->flow.state = FLOW_NOT_INIT;
 	driver->flow.rxLen = 0;
-	create_error_ao(&ao_error, driver, insert_error, ERROR_INVALID_DATA, 0);
 
-	post_AO(&(ao_error.ao_base), driver->flow.rxBlock);
+}
+
+void add_crc_at_block(char *block)
+{
+	int8_t len = strlen(block);
+
+	int8_t crc = crc8_calc(0, block, len);
+	char CRC[CRC_SIZE];
+	int_to_ASCII(crc, CRC);
+	//agrego el crc
+
+	block[len] = CRC[0];
+	block[len + 1] = CRC[1];
+	block[len + 2] = '\0';
 }

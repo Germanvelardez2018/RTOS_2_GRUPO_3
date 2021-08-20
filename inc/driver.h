@@ -87,11 +87,9 @@ typedef struct
 
 /*==========================Declaracion de funciones publicas======================*/
 
-bool_t driver_init(driver_t* driver);
+void driver_init(driver_t* driver);
 
 void led_task(void* params);
-
-void send_block(char* block,driver_t* driver);
 
 
 void add_crc_at_block(char* block);

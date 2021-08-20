@@ -12,6 +12,8 @@
 #include "sapi.h"
 #include "error_msg.h"
 
+#include "uartIRQ.h"//!BORRAR!
+
 /*============================Declaracion de funciones privadas====================*/
 
 static void event_handler(void *obj);

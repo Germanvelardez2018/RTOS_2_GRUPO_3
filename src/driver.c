@@ -52,23 +52,6 @@ void driver_init(driver_t *driver)
 	init_c3_task(driver);	//Se inicializa la capa 3 (capa aplicacion que procesa los mensajes).
 }
 
-/*
- * Controlar donde iria esta funcion
- * */
-
-void add_crc_at_block(char *block)
-{
-	int8_t len = strlen(block);
-
-	int8_t crc = crc8_calc(0, block, len);
-	char CRC[CRC_SIZE];
-	int_to_ASCII(crc, CRC);
-	//agrego el crc
-
-	block[len] = CRC[0];
-	block[len + 1] = CRC[1];
-	block[len + 2] = '\0';
-}
 
 /*================================Funciones privadas================================*/
 
@@ -154,23 +137,7 @@ void c3_task(void *params)
 	}
 }
 
-void send_block(char *block, driver_t *driver)
 
-{
-	/*Antes de enviar el mensaje calcular CRC y agregarlo*/
-	add_crc_at_block(block);
-	/* Se envia a la cola de transmision el block a transmitir*/
-	xQueueSend(driver->onTxQueue, &block, portMAX_DELAY);
-	/* No se permite que se modifique txcounter*/
-	taskENTER_CRITICAL();
-	/* Si se esta enviando algo no se llama a la interrupcion para no interrumpir el delay*/
-	if (driver->flow.tx_counter == 0) //
-	{
-		txInterruptEnable(driver);
-	}
-	taskEXIT_CRITICAL();
-	uartSetPendingInterrupt(driver->uart);
-}
 
 void init_timers(driver_t *driver)
 {
