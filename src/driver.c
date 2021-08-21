@@ -38,7 +38,6 @@ void init_c3_task(driver_t *driver);
 
 /*================================Funciones publicas==============================*/
 
-
 void driver_init(driver_t *driver)
 {
 	init_timers(driver); //Se crean los timers de "timeout" de Tx y Rx.
@@ -49,9 +48,8 @@ void driver_init(driver_t *driver)
 
 	init_uart(driver); //Se configura la uart y se inicializan las interrupciones.
 
-	init_c3_task(driver);	//Se inicializa la capa 3 (capa aplicacion que procesa los mensajes).
+	init_c3_task(driver); //Se inicializa la capa 3 (capa aplicacion que procesa los mensajes).
 }
-
 
 /*================================Funciones privadas================================*/
 
@@ -64,8 +62,6 @@ void c3_task(void *params)
 	ao_base_t ao_snake = {.state = AO_OFF};
 	ao_base_t ao_camel = {.state = AO_OFF};
 	ao_base_t ao_pascal = {.state = AO_OFF};
-
-	ao_error_t ao_error = {.ao_base.state = AO_OFF};
 
 	//ARRAY para ordenarlos mejor
 	ao_base_t *active_objects[AO_SIZE] = {
@@ -86,7 +82,7 @@ void c3_task(void *params)
 
 	while (TRUE)
 	{
-		gpioToggle(CHECK_LED);		//Led de control.
+		gpioToggle(CHECK_LED); //Led de control.
 
 		/* Se recibiran los bloques de datos mediante queue onRxQueue (se considera capa 2 o 3)
 		 * Se espera a que venga un bloque por la cola*/
@@ -100,12 +96,9 @@ void c3_task(void *params)
 
 		if (checkOk != BLOCK_OK)
 		{
-
-			create_error_ao(&ao_error, driver, insert_error, checkOk, 0);
-
-			post_AO(&(ao_error.ao_base), block);
+			insert_error(block, checkOk);
+			send_block(block, driver);
 		}
-
 		/*Si el bloque es correcto se le da formato*/
 		else
 		{
@@ -136,8 +129,6 @@ void c3_task(void *params)
 		gpioToggle(CHECK_LED);
 	}
 }
-
-
 
 void init_timers(driver_t *driver)
 {
