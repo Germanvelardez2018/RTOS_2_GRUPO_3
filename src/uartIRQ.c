@@ -204,7 +204,7 @@ static void _onRxCallback(void *param)
 	{
 		// Obtenemos el byte de la UART seleccionada
 		char new_byte = uartRxRead(driver->uart);
-		_processing_byte(new_byte, (driver_t *)driver);
+		_processing_byte(new_byte, driver);
 	}
 	else
 	{
