@@ -124,6 +124,45 @@ void onTxTimeOutCallback(TimerHandle_t params)
 	}
 }
 
+
+
+
+
+static void _send_to_c3(driver_t* driver)
+{
+
+
+	BaseType_t xHigherPriorityTaskWoken;
+
+	    /* We have not woken a task at the start of the ISR. */
+	    xHigherPriorityTaskWoken = pdFALSE;
+
+
+
+	xQueueSendFromISR(driver->onRxQueue, (void *)&(driver->flow.rxBlock), xHigherPriorityTaskWoken);
+
+
+	driver->flow.state = FLOW_NOT_INIT;
+	//Una vez que el bloque esta en la cola pido otro bloque para el siguiente paquete. Es responsabilidad de
+	//la aplicacion liberar el bloque mediante una transmision o con la funcion putBuffer()
+	driver->flow.rxBlock = (char *)QMPool_get(&(driver->memory.pool), 0); //pido un bloque del pool
+							  //Chequeo si tengo un bloque de memoria, sino anulo la recepcion de paquetes
+	if (driver->flow.rxBlock == NULL)
+	{
+		uartCallbackClr(driver->uart, UART_RECEIVE);
+	}
+
+	 /* Now the buffer is empty we can switch context if necessary. */
+	    if( xHigherPriorityTaskWoken )
+	    {
+	        /* Actual macro used here is port specific. */
+	        taskYIELD_FROM_ISR ();
+	    }
+
+
+}
+
+
 void onRxTimeOutCallback(TimerHandle_t params)
 {
 
@@ -131,27 +170,10 @@ void onRxTimeOutCallback(TimerHandle_t params)
 
 	// Inicio seccion critica
 	taskENTER_CRITICAL();
-	//Verificar que tengamos un bloque de mensaje cerrado, en caso contrario descartar
-	//Tengo bloque cerrado y listo para enviar. Mandarlo por la queue
-	if (driver->flow.state == FLOW_CLOSE)
-	{
 
-		xQueueSend(driver->onRxQueue, (void *)&(driver->flow.rxBlock), 0);
-		driver->flow.state = FLOW_NOT_INIT;
-		//Una vez que el bloque esta en la cola pido otro bloque para el siguiente paquete. Es responsabilidad de
-		//la aplicacion liberar el bloque mediante una transmision o con la funcion putBuffer()
-		driver->flow.rxBlock = (char *)QMPool_get(&(driver->memory.pool), 0); //pido un bloque del pool
-																			  //Chequeo si tengo un bloque de memoria, sino anulo la recepcion de paquetes
-		if (driver->flow.rxBlock == NULL)
-		{
-			uartCallbackClr(driver->uart, UART_RECEIVE);
-		}
-	}
-	else
-	{	// Paso al time out y el bloque no esta cerrado, descartar
-		//  printf("descarto buffer\n");
-		_discard_block(driver);
-	}
+	printf("timeout\n");
+	_discard_block(driver->flow.rxBlock);
+
 
 	taskEXIT_CRITICAL();
 }
@@ -285,10 +307,16 @@ static void _processing_byte(char new_byte, driver_t *driver)
 		{
 			driver->flow.state = FLOW_CLOSE;
 			driver->flow.rxBlock[driver->flow.rxLen - CRC_SIZE] = '\0';
+
+			//send to c3
+			printf("%s\n",driver->flow.rxBlock);
+
+			_send_to_c3(driver);
+			printf("%s\n",driver->flow.rxBlock);
 		}
 		else
 		{
-			//_discard_block(driver);
+
 			insert_error(driver->flow.rxBlock, ERROR_INVALID_DATA);
 			send_block_from_ISR(driver->flow.rxBlock, driver);
 		}
