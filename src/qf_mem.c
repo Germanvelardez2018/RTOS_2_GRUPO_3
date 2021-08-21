@@ -191,7 +191,7 @@ void *QMPool_get( QMPool * const me, unsigned short const margin )
 {
     QFreeBlock *fb;
 
-    portENTER_CRITICAL(); //Enter on critical section
+  //  portENTER_CRITICAL(); //Enter on critical section
 
     /* have more free blocks than the requested margin? */
     if ( me->nFree > ( QMPoolCtr )margin )
@@ -236,7 +236,7 @@ void *QMPool_get( QMPool * const me, unsigned short const margin )
 
     }
 
-    portEXIT_CRITICAL(); //Exit from critical section
+  //  portEXIT_CRITICAL(); //Exit from critical section
 
     return fb;  /* return the block or NULL pointer to the caller */
 }

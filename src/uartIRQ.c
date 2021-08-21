@@ -131,33 +131,24 @@ void onTxTimeOutCallback(TimerHandle_t params)
 static void _send_to_c3(driver_t* driver)
 {
 
-
 	BaseType_t xHigherPriorityTaskWoken;
-
 	    /* We have not woken a task at the start of the ISR. */
-	    xHigherPriorityTaskWoken = pdFALSE;
-
-
-
+	xHigherPriorityTaskWoken = pdFALSE;
 	xQueueSendFromISR(driver->onRxQueue, (void *)&(driver->flow.rxBlock), xHigherPriorityTaskWoken);
-
-
 	driver->flow.state = FLOW_NOT_INIT;
 	//Una vez que el bloque esta en la cola pido otro bloque para el siguiente paquete. Es responsabilidad de
 	//la aplicacion liberar el bloque mediante una transmision o con la funcion putBuffer()
 	driver->flow.rxBlock = (char *)QMPool_get(&(driver->memory.pool), 0); //pido un bloque del pool
+
 							  //Chequeo si tengo un bloque de memoria, sino anulo la recepcion de paquetes
 	if (driver->flow.rxBlock == NULL)
 	{
 		uartCallbackClr(driver->uart, UART_RECEIVE);
+
 	}
 
-	 /* Now the buffer is empty we can switch context if necessary. */
-	    if( xHigherPriorityTaskWoken )
-	    {
-	        /* Actual macro used here is port specific. */
-	        taskYIELD_FROM_ISR ();
-	    }
+
+
 
 
 }
@@ -171,7 +162,6 @@ void onRxTimeOutCallback(TimerHandle_t params)
 	// Inicio seccion critica
 	taskENTER_CRITICAL();
 
-	printf("timeout\n");
 	_discard_block(driver->flow.rxBlock);
 
 
@@ -309,10 +299,7 @@ static void _processing_byte(char new_byte, driver_t *driver)
 			driver->flow.rxBlock[driver->flow.rxLen - CRC_SIZE] = '\0';
 
 			//send to c3
-			printf("%s\n",driver->flow.rxBlock);
-
 			_send_to_c3(driver);
-			printf("%s\n",driver->flow.rxBlock);
 		}
 		else
 		{
