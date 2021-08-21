@@ -36,6 +36,7 @@ typedef struct
 	AO_state state;
 	driver_t *driver; //NECESARIO PARA conectarse con UART
 	TaskHandle_t* task; // Puntero para referenciar la tarea asociada al objeto activo
+	QueueHandle_t returnQueue;
 } ao_base_t;
 
 typedef struct

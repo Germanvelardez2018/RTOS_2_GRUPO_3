@@ -58,10 +58,19 @@ void c3_task(void *params)
 
 	driver_t *driver = (driver_t *)params;
 
+	QueueHandle_t c2Queue;
+
+	c2Queue = xQueueCreate(POOL_TOTAL_BLOCKS, sizeof(char *));
+	SIMPLE_ASSERT(c2Queue);
+
 	// objetos activos para cada tipo de procesamiento posible
 	ao_base_t ao_snake = {.state = AO_OFF};
 	ao_base_t ao_camel = {.state = AO_OFF};
 	ao_base_t ao_pascal = {.state = AO_OFF};
+
+	ao_snake.returnQueue = c2Queue;
+	ao_camel.returnQueue = c2Queue;
+	ao_pascal.returnQueue = c2Queue;
 
 	//ARRAY para ordenarlos mejor
 	ao_base_t *active_objects[AO_SIZE] = {
@@ -86,47 +95,54 @@ void c3_task(void *params)
 
 		/* Se recibiran los bloques de datos mediante queue onRxQueue (se considera capa 2 o 3)
 		 * Se espera a que venga un bloque por la cola*/
-		xQueueReceive(driver->onRxQueue, &block, portMAX_DELAY);
-
-		/*Se chequea el block, si da error se crea ao error*/
-		errorCodes_t checkOk = BLOCK_OK;
-		/*Se declara un objeto activo*/
-
-		checkOk = check_block(block);
-
-		if (checkOk != BLOCK_OK)
+		if (xQueueReceive(driver->onRxQueue, &block, 10))
 		{
-			insert_error(block, checkOk);
+			/*Se chequea el block, si da error se crea ao error*/
+			errorCodes_t checkOk = BLOCK_OK;
+			/*Se declara un objeto activo*/
+
+			checkOk = check_block(block);
+
+			if (checkOk != BLOCK_OK)
+			{
+				insert_error(block, checkOk);
+				send_block(block, driver);
+			}
+			/*Si el bloque es correcto se le da formato*/
+			else
+			{
+
+				char C = block[FORMAT_DESIGNATOR_POSITION];
+				/*Se define el objeto activo*/
+				switch (C)
+				{
+				case FPASCAL:
+					index = AO_PASCAL;
+					break;
+				case FCAMEL:
+					index = AO_CAMEL;
+					break;
+				case FSNAKE:
+					index = AO_SNAKE;
+					break;
+				default:
+					break;
+				}
+				/*Se crea el objeto activo*/
+				if (create_ao(active_objects[index], driver, callbacks[index], 0))
+				{
+					post_AO(active_objects[index], block);
+				}
+			}
+			gpioToggle(CHECK_LED);
+		}
+
+		if(xQueueReceive(c2Queue, &block, 10))
+		{
 			send_block(block, driver);
 		}
-		/*Si el bloque es correcto se le da formato*/
-		else
-		{
 
-			char C = block[FORMAT_DESIGNATOR_POSITION];
-			/*Se define el objeto activo*/
-			switch (C)
-			{
-			case FPASCAL:
-				index = AO_PASCAL;
-				break;
-			case FCAMEL:
-				index = AO_CAMEL;
-				break;
-			case FSNAKE:
-				index = AO_SNAKE;
-				break;
-			default:
-				break;
-			}
-			/*Se crea el objeto activo*/
-			if (create_ao(active_objects[index], driver, callbacks[index], 0))
-			{
-				post_AO(active_objects[index], block);
-			}
-		}
 
-		gpioToggle(CHECK_LED);
 	}
 }
 
@@ -186,6 +202,6 @@ void init_c3_task(driver_t *driver)
 				(const char *)"modulo driver", // Nombre de la tarea como String amigable para el usuario
 				configMINIMAL_STACK_SIZE * 8,  // Cantidad de stack de la tarea
 				driver,						   // Parametros de tarea
-				tskIDLE_PRIORITY + 0,		   // Prioridad de la tarea
+				tskIDLE_PRIORITY + 1,		   // Prioridad de la tarea
 				0);							   // Puntero a la tarea creada en el sistema
 }

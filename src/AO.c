@@ -45,7 +45,7 @@ bool_t create_ao(ao_base_t *obj, driver_t *driver, callback_ao_t action, uint8_t
 	{
 		//se asigna callback
 		obj->action = action;
-		retValue = xTaskCreate(event_handler, (const char *)"AO generico", configMINIMAL_STACK_SIZE * 8, obj, tskIDLE_PRIORITY + priorty, &(obj->task));
+		retValue = xTaskCreate(event_handler, (const char *)"AO generico", configMINIMAL_STACK_SIZE * 8, obj, tskIDLE_PRIORITY + priorty, obj->task);
 	}
 
 	if (retValue != pdFALSE)
@@ -74,7 +74,7 @@ static void event_handler(void *obj)
 		if (xQueueReceive(ao->queue, &(ao->message), 0))
 		{
 			(*ao->action)((ao->message));
-			send_block((ao->message), ao->driver);
+			xQueueSend(ao->returnQueue, &ao->message,0);
 		}
 		else
 		{

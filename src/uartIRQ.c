@@ -134,7 +134,7 @@ static void _send_to_c3(driver_t* driver)
 	BaseType_t xHigherPriorityTaskWoken;
 	    /* We have not woken a task at the start of the ISR. */
 	xHigherPriorityTaskWoken = pdFALSE;
-	xQueueSendFromISR(driver->onRxQueue, (void *)&(driver->flow.rxBlock), xHigherPriorityTaskWoken);
+	xQueueSendFromISR(driver->onRxQueue, &(driver->flow.rxBlock), &xHigherPriorityTaskWoken);
 	driver->flow.state = FLOW_NOT_INIT;
 	//Una vez que el bloque esta en la cola pido otro bloque para el siguiente paquete. Es responsabilidad de
 	//la aplicacion liberar el bloque mediante una transmision o con la funcion putBuffer()
@@ -162,7 +162,7 @@ void onRxTimeOutCallback(TimerHandle_t params)
 	// Inicio seccion critica
 	taskENTER_CRITICAL();
 
-	_discard_block(driver->flow.rxBlock);
+	_discard_block(driver);
 
 
 	taskEXIT_CRITICAL();

@@ -28,7 +28,7 @@
 #define FRAME_MAX_SIZE				200
 #define BLOCK_SIZE 					(FRAME_MAX_SIZE+1)
 #define	PROTOCOL_TIMEOUT			pdMS_TO_TICKS(4) 				//4 ms de timeout por caracter
-#define POOL_TOTAL_BLOCKS 			4								//catidad de bloques en el pool de memoria
+#define POOL_TOTAL_BLOCKS 			10								//catidad de bloques en el pool de memoria
 #define POOL_SIZE 					POOL_TOTAL_BLOCKS*BLOCK_SIZE 	//Tamaño total del pool
 
 
