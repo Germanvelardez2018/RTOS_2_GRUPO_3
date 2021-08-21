@@ -24,10 +24,10 @@
 
 static void _discard_block(driver_t *driver);
 
-// Callback para la recepción
-static void _onRxCallback(void *param);
-// Callback para la transmicion
-static void _onTxCallback(void *param);
+
+static void _onRxCallback(void *param);// Callback para la recepción
+
+static void _onTxCallback(void *param);// Callback para la transmicion
 
 static void _processing_byte(char new_byte, driver_t *driver);
 
@@ -147,10 +147,6 @@ static void _send_to_c3(driver_t* driver)
 
 	}
 
-
-
-
-
 }
 
 
@@ -190,7 +186,7 @@ void send_block(char *block, driver_t *driver)
 
 
 
-/*Funciones privadas*/
+/*================================Funciones privadas================================*/
 
 // Callback para la recepción
 static void _onRxCallback(void *param)
