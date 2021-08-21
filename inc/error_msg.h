@@ -32,10 +32,6 @@ typedef enum
 
 /*=========================Declaracion de funciones publicas========================*/
 
-void  insert_error_msg_0(char* b);
-
-void  insert_error_msg_1(char* b);
-
 
 void insert_error(char* block,errorCodes_t type);
 

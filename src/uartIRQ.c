@@ -127,7 +127,7 @@ void onTxTimeOutCallback(TimerHandle_t params)
 
 
 
-
+/*Para enviar un bloque cerrado con menos de 200 caracteres*/
 static void _send_to_c3(driver_t* driver)
 {
 
