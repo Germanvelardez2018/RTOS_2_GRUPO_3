@@ -21,6 +21,7 @@
 
 #define CHECK_LED LED1
 #define AO_SIZE 3
+#define QUEUE_DELAYS 8
 
 /*============================Declaracion de funciones privadas====================*/
 
@@ -95,7 +96,7 @@ void c3_task(void *params)
 
 		/* Se recibiran los bloques de datos mediante queue onRxQueue (se considera capa 2 o 3)
 		 * Se espera a que venga un bloque por la cola*/
-		if (xQueueReceive(driver->onRxQueue, &block, 10))
+		if (xQueueReceive(driver->onRxQueue, &block, QUEUE_DELAYS))
 		{
 			/*Se chequea el block, si da error se crea ao error*/
 			errorCodes_t checkOk = BLOCK_OK;
@@ -137,7 +138,7 @@ void c3_task(void *params)
 			gpioToggle(CHECK_LED);
 		}
 
-		if(xQueueReceive(c2Queue, &block, 10))
+		if(xQueueReceive(c2Queue, &block, QUEUE_DELAYS))
 		{
 			send_block(block, driver);
 		}
