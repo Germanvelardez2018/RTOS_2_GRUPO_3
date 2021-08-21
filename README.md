@@ -14,14 +14,6 @@
 </ul>
 
 
-<h4 style="text-align:center;">
-    Grafico del sistema
-</h4>
-=======================================================
-<figure style="float: center">
-  <img src="https://user-images.githubusercontent.com/68166291/127549597-4ab497f7-ba4e-4abc-a742-df3bfea10ee6.png" >
-  
-</figure>
 
 
 
@@ -84,14 +76,7 @@ Se modifico lo siguiente:
 
 
 
-<h4 style="text-align:center;">
-    Grafico del sistema con implementacion de objetos activos
-</h4>
-=======================================================
-<figure style="float: center">
-  <img src="diragrama_v2.png" >
-  
-</figure>
+
 
 
 ### Quinta semana: Implementacion de objeto Activo.
@@ -105,8 +90,31 @@ Se modifico lo siguiente:
 	 <li> Se agrega diagrama del sistema con la implementacion de objetos activos</li>
 </ul>
  
+ 
+ 
+### Semana Final: Correciones finales.
+     
+     
+     Se modifico lo siguiente:
+<ul>
+	 <li>Se elimino el objeto activo para los errores</li>
+	 <li>Se modifico el diagrada del sistema </li>
+         <li>Se formateo el codigo para simplificar la lectura, comprension  y  mantenimiento del mismo </li>
+	 <li>Se agrego TaskHandler a los objetos activos</li>
+	 <li> Se separo las responsabilidades de las capas</li>
+	 <li> Se resolvio error de cerrar bloques de datos con RX timeout</li>
+</ul>
+ 
 
 
 
+<h4 style="text-align:center;">
+    Diagrama final del sistema
+</h4>
+=======================================================
+<figure style="float: center">
+  <img src="DRIAGRAMA_FINAL.png" >
+  
+</figure>
 
 
